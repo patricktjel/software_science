@@ -18,13 +18,41 @@ void init() {
     sylvan_init_bdd();
 }
 
-void bdd() {
-    // init variables
-    bool cs = false;
-    int wait = 1;
-    int finished = 0;
+void visualize_bdd(BDD bdd) {
+    int i = 0;
+    char b[256];
+    snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
+    FILE *f = fopen(b, "w+");
+    sylvan_fprintdot(f, bdd);
+    fclose(f);
+}
 
-    sylvan_true
+BDD* allocate_var() {
+    BDD* my_var = (BDD*)calloc(sizeof(BDD), 1);
+    sylvan_protect(my_var);
+    return my_var;
+}
+
+void free_var(BDD* my_var) {
+    sylvan_unprotect(my_var);
+    free(my_var);
+}
+
+void bdd() {
+    LACE_ME;
+    // init variables
+//    bool cs = false;
+//    int wait = 1;
+//    int finished = 0;
+
+
+    BDD zero = sylvan_false;
+    BDD one  = sylvan_true;
+
+    BDD test = sylvan_ithvar(2);
+    assert(sylvan_high(test) == one);
+    assert(sylvan_low(test) == zero);
+    visualize_bdd(test);
 }
 
 void quit() {
@@ -35,15 +63,6 @@ void quit() {
     sylvan_quit();
     // deinitialize Lace
     lace_exit();
-}
-
-void visualize_bdd(BDD bdd) {
-    int i = 0;
-    char b[256];
-    snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
-    FILE *f = fopen(b, "w+");
-    sylvan_fprintdot(f, bdd);
-    fclose(f);
 }
 
 int main() {
