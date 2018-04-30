@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/patrick/CLionProjects/mutex/main.c" "/home/patrick/CLionProjects/mutex/cmake-build-debug/CMakeFiles/mutex.dir/main.c.o"
+  "/home/lars/git/software_science/mutex/main.c" "/home/lars/git/software_science/mutex/cmake-build-debug/CMakeFiles/mutex.dir/main.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

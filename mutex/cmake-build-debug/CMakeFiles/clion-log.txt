@@ -1,5 +1,5 @@
-/home/patrick/Downloads/clion-2018.1.2/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/patrick/CLionProjects/mutex
--- The C compiler identification is GNU 5.4.0
+/snap/clion/19/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/lars/git/software_science/mutex
+-- The C compiler identification is GNU 7.3.0
 -- Check for working C compiler: /usr/bin/cc
 -- Check for working C compiler: /usr/bin/cc -- works
 -- Detecting C compiler ABI info
@@ -8,4 +8,4 @@
 -- Detecting C compile features - done
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/patrick/CLionProjects/mutex/cmake-build-debug
+-- Build files have been written to: /home/lars/git/software_science/mutex/cmake-build-debug
