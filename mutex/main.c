@@ -1,14 +1,6 @@
 #include <stdio.h>
 #include <sylvan.h>
-
-int main() {
-    init();
-
-
-
-    quit();
-    return 0;
-}
+#include <stdbool.h>
 
 void init() {
     // 0 = auto    −    detect  number  of  Lace  workers
@@ -26,6 +18,15 @@ void init() {
     sylvan_init_bdd();
 }
 
+void bdd() {
+    // init variables
+    bool cs = false;
+    int wait = 1;
+    int finished = 0;
+
+    sylvan_true
+}
+
 void quit() {
     /* if Sylvan is compiled with -DSYLVAN_STATS=ON
      * then print statistics on stderr. */
@@ -34,4 +35,22 @@ void quit() {
     sylvan_quit();
     // deinitialize Lace
     lace_exit();
+}
+
+void visualize_bdd(BDD bdd) {
+    int i = 0;
+    char b[256];
+    snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
+    FILE *f = fopen(b, "w+");
+    sylvan_fprintdot(f, bdd);
+    fclose(f);
+}
+
+int main() {
+    init();
+
+    bdd();
+
+    quit();
+    return 0;
 }
