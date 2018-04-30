@@ -63,3 +63,5 @@ compile_commands.json
 CTestTestfile.cmake
 build
 
+###IDEA
+*/.idea
