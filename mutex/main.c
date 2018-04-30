@@ -23,19 +23,8 @@ void visualize_bdd(BDD bdd) {
     char b[256];
     snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
     FILE *f = fopen(b, "w+");
-    sylvan_fprintdot(f, bdd);
+    mtbdd_fprintdot_nc(f, bdd);
     fclose(f);
-}
-
-BDD* allocate_var() {
-    BDD* my_var = (BDD*)calloc(sizeof(BDD), 1);
-    sylvan_protect(my_var);
-    return my_var;
-}
-
-void free_var(BDD* my_var) {
-    sylvan_unprotect(my_var);
-    free(my_var);
 }
 
 void bdd() {
@@ -45,14 +34,15 @@ void bdd() {
 //    int wait = 1;
 //    int finished = 0;
 
-
-    BDD zero = sylvan_false;
     BDD one  = sylvan_true;
+    BDD zero = sylvan_false;
 
-    BDD test = sylvan_ithvar(2);
-    assert(sylvan_high(test) == one);
-    assert(sylvan_low(test) == zero);
-    visualize_bdd(test);
+    BDD a = sylvan_ithvar(1);
+    BDD b = sylvan_ithvar(2);
+    assert(sylvan_high(a) == one);
+    assert(sylvan_low(a) == zero);
+    BDD result = sylvan_and(a,b);
+    visualize_bdd(result);
 }
 
 void quit() {
