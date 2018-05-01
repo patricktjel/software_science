@@ -23,26 +23,27 @@ void visualize_bdd(BDD bdd) {
     char b[256];
     snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
     FILE *f = fopen(b, "w+");
-    mtbdd_fprintdot_nc(f, bdd);
+    sylvan_fprintdot(f, bdd);
     fclose(f);
 }
 
 void bdd() {
     LACE_ME;
-    // init variables
-//    bool cs = false;
-//    int wait = 1;
-//    int finished = 0;
 
     BDD one  = sylvan_true;
     BDD zero = sylvan_false;
 
-    BDD a = sylvan_ithvar(1);
-    BDD b = sylvan_ithvar(2);
-    assert(sylvan_high(a) == one);
-    assert(sylvan_low(a) == zero);
-    BDD result = sylvan_and(a,b);
-    visualize_bdd(result);
+    BDD CS = sylvan_ithvar(1);
+    BDD CS1 = sylvan_ithvar(11);
+    BDD W = sylvan_ithvar(2);
+    BDD W1 = sylvan_ithvar(21);
+    BDD F = sylvan_ithvar(3);
+    BDD F1 = sylvan_ithvar(31);
+
+    BDD set = sylvan_and(sylvan_not(CS), W);
+    set = sylvan_and(set, sylvan_not(F));
+
+    visualize_bdd(set);
 }
 
 void quit() {
