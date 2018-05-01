@@ -23,7 +23,7 @@ void visualize_bdd(BDD bdd) {
     char b[256];
     snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
     FILE *f = fopen(b, "w+");
-    sylvan_fprintdot(f, bdd);
+    mtbdd_fprintdot_nc(f, bdd);
     fclose(f);
 }
 
@@ -49,10 +49,16 @@ void bdd() {
     BDD zero = sylvan_false;
     BDD one  = sylvan_true;
 
-    BDD test = sylvan_ithvar(2);
-    assert(sylvan_high(test) == one);
-    assert(sylvan_low(test) == zero);
-    visualize_bdd(test);
+    BDD cs = sylvan_nithvar(1);
+    BDD w = sylvan_ithvar(2);
+    BDD f = sylvan_nithvar(3);
+    BDD com = sylvan_and(cs, w);
+    BDD com2 = sylvan_and(com, f);
+    //BDD test2 = sylvan_ithvar(3);
+    //BDD test3 = sylvan_and(test, test2);
+    //assert(sylvan_high(com2) == one);
+    //assert(sylvan_low(com2) == zero);
+    visualize_bdd(com2);
 }
 
 void quit() {
