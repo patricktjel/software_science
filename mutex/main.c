@@ -21,9 +21,9 @@ void init() {
 void visualize_bdd(BDD bdd) {
     int i = 0;
     char b[256];
-    snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
+    snprintf(b, 256, "./BDD-%d.dot", i);
     FILE *f = fopen(b, "w+");
-    mtbdd_fprintdot_nc(f, bdd);
+    mtbdd_fprintdot(f, bdd);
     fclose(f);
 }
 
@@ -40,15 +40,27 @@ void bdd() {
     BDD F = sylvan_ithvar(3);
     BDD F1 = sylvan_ithvar(31);
 
+    BDD set = sylvan_set_empty();
+    set = sylvan_set_add(set,CS);
+    set = sylvan_set_add(set,W);
+    set = sylvan_set_add(set,F);
+
     BDD initState = sylvan_and(sylvan_not(CS), sylvan_and(W, sylvan_not(F)));
 
-    BDD three = sylvan_and(CS1, sylvan_and(sylvan_not(W1), sylvan_not(F1)));
+    BDD oneToThree = sylvan_and(sylvan_and(sylvan_not(CS), CS1),
+                                sylvan_and(W, sylvan_not(W1)));
 
-    BDD oneToThree = sylvan_and(sylvan_and(sylvan_not(CS), sylvan_and(W, sylvan_not(F))),
-                                sylvan_and(CS1, sylvan_and(sylvan_not(W1), sylvan_not(F1)))
-                                );
+    BDD threeToFour = sylvan_and(CS, sylvan_not(CS1));
 
-    visualize_bdd(oneToThree);
+    BDD threeToTwo = sylvan_and(sylvan_and(CS,sylvan_not(CS1)),
+                                sylvan_and(sylvan_not(F), F1));
+
+    BDD TwoToOne = sylvan_and(sylvan_and(sylvan_not(W), W1),
+                              sylvan_and(F, sylvan_not(F1)));
+
+
+
+    visualize_bdd(initState);
 }
 
 void quit() {
