@@ -22,7 +22,7 @@ void visualize_bdd(BDD bdd) {
     char b[256];
     snprintf(b, 256, "./BDD.dot");
     FILE *f = fopen(b, "w+");
-    mtbdd_fprintdot_nc(f, bdd);
+    mtbdd_fprintdot(f, bdd);
     fclose(f);
 }
 
@@ -53,36 +53,68 @@ void bdd() {
     BDD threeToTwo = sylvan_and(sylvan_and(CS,sylvan_not(CS1)),
                                 sylvan_and(sylvan_not(F), F1));
 
-    BDD TwoToOne = sylvan_and(sylvan_and(sylvan_not(W), W1),
+    BDD twoToOne = sylvan_and(sylvan_and(sylvan_not(W), W1),
                               sylvan_and(F, sylvan_not(F1)));
 
+    BDD transitions[4] = {oneToThree, threeToFour, threeToTwo, twoToOne};
+
 //    sylvan set for sylvan_exists
-    BDD set = sylvan_set_empty();
-    sylvan_protect(&set);
-    set = sylvan_set_add(set,1);
-    set = sylvan_set_add(set,2);
-    set = sylvan_set_add(set,3);
+    BDD setOneToThree = sylvan_set_empty();
+    sylvan_protect(&setOneToThree);
+    setOneToThree = sylvan_set_add(setOneToThree,1);
+    setOneToThree = sylvan_set_add(setOneToThree,2);
+
+    BDD setThreeToFour = sylvan_set_empty();
+    sylvan_protect(&setThreeToFour);
+    setThreeToFour = sylvan_set_add(setThreeToFour,1);
+
+    BDD setThreeToTwo = sylvan_set_empty();
+    sylvan_protect(&setThreeToTwo);
+    setThreeToTwo = sylvan_set_add(setThreeToTwo,1);
+    setThreeToTwo = sylvan_set_add(setThreeToTwo,3);
+
+    BDD setTwoToOne = sylvan_set_empty();
+    sylvan_protect(&setTwoToOne);
+    setTwoToOne = sylvan_set_add(setTwoToOne,2);
+    setTwoToOne = sylvan_set_add(setTwoToOne,3);
+
+    BDD transitions_set[4] = {setOneToThree, setThreeToFour, setThreeToTwo, setTwoToOne};
 
 //    sylvan map for sylvan compose
-    BDDMAP map = sylvan_map_empty();
-    sylvan_protect(&map);
-    map = sylvan_map_add(map, 11, sylvan_ithvar(1));
-    map = sylvan_map_add(map, 21, sylvan_ithvar(2));
-    map = sylvan_map_add(map, 31, sylvan_ithvar(3));
+    BDDMAP mapOneToThree = sylvan_map_empty();
+    sylvan_protect(&mapOneToThree);
+    mapOneToThree = sylvan_map_add(mapOneToThree, 11, sylvan_ithvar(1));
+    mapOneToThree = sylvan_map_add(mapOneToThree, 21, sylvan_ithvar(2));
+
+    BDDMAP mapThreeToFour = sylvan_map_empty();
+    sylvan_protect(&mapThreeToFour);
+    mapThreeToFour = sylvan_map_add(mapThreeToFour, 11, sylvan_ithvar(1));
+
+    BDDMAP mapThreeToTwo = sylvan_map_empty();
+    sylvan_protect(&mapThreeToTwo);
+    mapThreeToTwo = sylvan_map_add(mapThreeToTwo, 11, sylvan_ithvar(1));
+    mapThreeToTwo = sylvan_map_add(mapThreeToTwo, 31, sylvan_ithvar(3));
+
+    BDDMAP mapTwoToOne = sylvan_map_empty();
+    sylvan_protect(&mapTwoToOne );
+    mapTwoToOne  = sylvan_map_add(mapTwoToOne , 21, sylvan_ithvar(2));
+    mapTwoToOne  = sylvan_map_add(mapTwoToOne , 31, sylvan_ithvar(3));
+
+    BDD transitions_map[4] = {mapOneToThree, mapThreeToFour, mapThreeToTwo, mapTwoToOne};
 
 //    while
+    BDD cur = initState;
+    for (int i = 0; i < 4; i=i+1) {
+        BDD r = sylvan_and(cur, transitions[i]);
 
-    BDD r = sylvan_and(initState, oneToThree);
-    r = sylvan_exists(r, set);
-    r = sylvan_compose(r, map);
+        r = sylvan_exists(r, transitions_set[i]);
+        r = sylvan_compose(r, transitions_map[i]);
 
-    r = sylvan_and(r, threeToFour);
-    r = sylvan_exists(r, set);
-    r = sylvan_compose(r, map);
+        cur = sylvan_or(cur, r);
+    }
 
-    printf("%lu", sylvan_nodecount(r));
-
-    visualize_bdd(r);
+    printf("%lu", sylvan_nodecount(cur));
+    visualize_bdd(cur);
 
     //unprotect the variables
     sylvan_unprotect(&CS);
@@ -91,8 +123,14 @@ void bdd() {
     sylvan_unprotect(&W1);
     sylvan_unprotect(&F);
     sylvan_unprotect(&F1);
-    sylvan_unprotect(&set);
-    sylvan_unprotect(&map);
+    sylvan_unprotect(&setOneToThree);
+    sylvan_unprotect(&setThreeToFour);
+    sylvan_unprotect(&setThreeToTwo);
+    sylvan_unprotect(&setTwoToOne);
+    sylvan_unprotect(&mapOneToThree);
+    sylvan_unprotect(&mapThreeToFour);
+    sylvan_unprotect(&mapThreeToTwo);
+    sylvan_unprotect(&mapTwoToOne);
 }
 
 void quit() {
