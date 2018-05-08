@@ -56,7 +56,7 @@ void bdd() {
     BDD twoToOne = sylvan_and(sylvan_and(sylvan_not(W), W1),
                               sylvan_and(F, sylvan_not(F1)));
 
-    BDD transitions[4] = {oneToThree, threeToFour, threeToTwo, twoToOne};
+    BDD transitions[4] = {twoToOne, oneToThree, threeToFour, threeToTwo};
 
 //    sylvan set for sylvan_exists
     BDD setOneToThree = sylvan_set_empty();
@@ -78,7 +78,13 @@ void bdd() {
     setTwoToOne = sylvan_set_add(setTwoToOne,2);
     setTwoToOne = sylvan_set_add(setTwoToOne,3);
 
-    BDD transitions_set[4] = {setOneToThree, setThreeToFour, setThreeToTwo, setTwoToOne};
+    BDD result = sylvan_set_empty();
+    sylvan_protect(&result);
+    result = sylvan_set_add(result,1);
+    result = sylvan_set_add(result,2);
+    result = sylvan_set_add(result,3);
+
+    BDD transitions_set[4] = {setTwoToOne, setOneToThree, setThreeToFour, setThreeToTwo};
 
 //    sylvan map for sylvan compose
     BDDMAP mapOneToThree = sylvan_map_empty();
@@ -100,19 +106,24 @@ void bdd() {
     mapTwoToOne  = sylvan_map_add(mapTwoToOne , 21, sylvan_ithvar(2));
     mapTwoToOne  = sylvan_map_add(mapTwoToOne , 31, sylvan_ithvar(3));
 
-    BDD transitions_map[4] = {mapOneToThree, mapThreeToFour, mapThreeToTwo, mapTwoToOne};
+    BDD transitions_map[4] = {mapTwoToOne, mapOneToThree, mapThreeToFour, mapThreeToTwo};
 
 //    while
     BDD cur = initState;
-    for (int i = 0; i < 4; i=i+1) {
-        BDD r = sylvan_and(cur, transitions[i]);
+    BDD vis = cur;
+    do {
+        vis = cur;
+        for (int i = 0; i < 4; i = i + 1) {
+            BDD r = sylvan_and(cur, transitions[i]);
 
-        r = sylvan_exists(r, transitions_set[i]);
-        r = sylvan_compose(r, transitions_map[i]);
+            r = sylvan_exists(r, transitions_set[i]);
+            r = sylvan_compose(r, transitions_map[i]);
 
-        cur = sylvan_or(cur, r);
-    }
+            cur = sylvan_or(cur, r);
+        }
+    } while (cur != vis);
 
+    printf("%lf", sylvan_satcount(cur, result));
     printf("%lu", sylvan_nodecount(cur));
     visualize_bdd(cur);
 
@@ -124,6 +135,7 @@ void bdd() {
     sylvan_unprotect(&F);
     sylvan_unprotect(&F1);
     sylvan_unprotect(&setOneToThree);
+    sylvan_unprotect(&result);
     sylvan_unprotect(&setThreeToFour);
     sylvan_unprotect(&setThreeToTwo);
     sylvan_unprotect(&setTwoToOne);
