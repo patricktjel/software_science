@@ -23,7 +23,7 @@ void visualize_bdd(BDD bdd) {
     char b[256];
     snprintf(b, 256, "./BDD-%d.dot", i);
     FILE *f = fopen(b, "w+");
-    mtbdd_fprintdot(f, bdd);
+    mtbdd_fprintdot_nc(f, bdd);
     fclose(f);
 }
 
@@ -34,11 +34,17 @@ void bdd() {
     BDD zero = sylvan_false;
 
     BDD CS = sylvan_ithvar(1);
+    sylvan_protect(&CS);
     BDD CS1 = sylvan_ithvar(11);
+    sylvan_protect(&CS1);
     BDD W = sylvan_ithvar(2);
+    sylvan_protect(&W);
     BDD W1 = sylvan_ithvar(21);
+    sylvan_protect(&W1);
     BDD F = sylvan_ithvar(3);
+    sylvan_protect(&F);
     BDD F1 = sylvan_ithvar(31);
+    sylvan_protect(&F1);
 
     BDD set = sylvan_set_empty();
     set = sylvan_set_add(set,CS);
@@ -61,6 +67,13 @@ void bdd() {
 
 
     visualize_bdd(initState);
+
+    sylvan_unprotect(&CS);
+    sylvan_unprotect(&CS1);
+    sylvan_unprotect(&W);
+    sylvan_unprotect(&W1);
+    sylvan_unprotect(&F);
+    sylvan_unprotect(&F1);
 }
 
 void quit() {
