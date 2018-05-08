@@ -19,9 +19,8 @@ void init() {
 }
 
 void visualize_bdd(BDD bdd) {
-    int i = 0;
     char b[256];
-    snprintf(b, 256, "./BDD-%d.dot", i);
+    snprintf(b, 256, "./BDD.dot");
     FILE *f = fopen(b, "w+");
     mtbdd_fprintdot_nc(f, bdd);
     fclose(f);
@@ -57,21 +56,31 @@ void bdd() {
     BDD TwoToOne = sylvan_and(sylvan_and(sylvan_not(W), W1),
                               sylvan_and(F, sylvan_not(F1)));
 
+//    sylvan set for sylvan_exists
     BDD set = sylvan_set_empty();
     sylvan_protect(&set);
     set = sylvan_set_add(set,1);
     set = sylvan_set_add(set,2);
     set = sylvan_set_add(set,3);
 
-    BDD r = sylvan_exists(oneToThree, set);
-
+//    sylvan map for sylvan compose
     BDDMAP map = sylvan_map_empty();
     sylvan_protect(&map);
     map = sylvan_map_add(map, 11, sylvan_ithvar(1));
     map = sylvan_map_add(map, 21, sylvan_ithvar(2));
     map = sylvan_map_add(map, 31, sylvan_ithvar(3));
 
-    r = sylvan_compose(r,map);
+//    while
+
+    BDD r = sylvan_and(initState, oneToThree);
+    r = sylvan_exists(r, set);
+    r = sylvan_compose(r, map);
+
+    r = sylvan_and(r, threeToFour);
+    r = sylvan_exists(r, set);
+    r = sylvan_compose(r, map);
+
+    printf("%lu", sylvan_nodecount(r));
 
     visualize_bdd(r);
 
