@@ -58,13 +58,15 @@ void bdd() {
                               sylvan_and(F, sylvan_not(F1)));
 
     BDD set = sylvan_set_empty();
+    sylvan_protect(&set);
     set = sylvan_set_add(set,1);
     set = sylvan_set_add(set,2);
-//    set = sylvan_set_add(set,3);
+    set = sylvan_set_add(set,3);
 
     BDD r = sylvan_exists(oneToThree, set);
 
     BDDMAP map = sylvan_map_empty();
+    sylvan_protect(&map);
     map = sylvan_map_add(map, 11, sylvan_ithvar(1));
     map = sylvan_map_add(map, 21, sylvan_ithvar(2));
     map = sylvan_map_add(map, 31, sylvan_ithvar(3));
@@ -80,6 +82,8 @@ void bdd() {
     sylvan_unprotect(&W1);
     sylvan_unprotect(&F);
     sylvan_unprotect(&F1);
+    sylvan_unprotect(&set);
+    sylvan_unprotect(&map);
 }
 
 void quit() {
