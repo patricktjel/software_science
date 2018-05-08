@@ -30,9 +30,7 @@ void visualize_bdd(BDD bdd) {
 void bdd() {
     LACE_ME;
 
-    BDD one  = sylvan_true;
-    BDD zero = sylvan_false;
-
+    //create variables and protect them
     BDD CS = sylvan_ithvar(1);
     sylvan_protect(&CS);
     BDD CS1 = sylvan_ithvar(11);
@@ -45,11 +43,6 @@ void bdd() {
     sylvan_protect(&F);
     BDD F1 = sylvan_ithvar(31);
     sylvan_protect(&F1);
-
-    BDD set = sylvan_set_empty();
-    set = sylvan_set_add(set,CS);
-    set = sylvan_set_add(set,W);
-    set = sylvan_set_add(set,F);
 
     BDD initState = sylvan_and(sylvan_not(CS), sylvan_and(W, sylvan_not(F)));
 
@@ -64,10 +57,23 @@ void bdd() {
     BDD TwoToOne = sylvan_and(sylvan_and(sylvan_not(W), W1),
                               sylvan_and(F, sylvan_not(F1)));
 
+    BDD set = sylvan_set_empty();
+    set = sylvan_set_add(set,1);
+    set = sylvan_set_add(set,2);
+//    set = sylvan_set_add(set,3);
 
+    BDD r = sylvan_exists(oneToThree, set);
 
-    visualize_bdd(initState);
+    BDDMAP map = sylvan_map_empty();
+    map = sylvan_map_add(map, 11, sylvan_ithvar(1));
+    map = sylvan_map_add(map, 21, sylvan_ithvar(2));
+    map = sylvan_map_add(map, 31, sylvan_ithvar(3));
 
+    r = sylvan_compose(r,map);
+
+    visualize_bdd(r);
+
+    //unprotect the variables
     sylvan_unprotect(&CS);
     sylvan_unprotect(&CS1);
     sylvan_unprotect(&W);
