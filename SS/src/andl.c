@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "andl.h"
 #include <string.h>
+#include <stdio.h>
 
 Node* new_node(char* name, int token, int numPlace) {
     Node* node = malloc(sizeof(Node));
@@ -23,7 +24,7 @@ Node* add_node(Node* first, Node* toAdd) {
 }
 
 Node* search(Node* head,char* name) {
-    Node *cursor = head;
+    Node* cursor = head;
     while(cursor!=NULL)
     {
         if(strcmp(cursor->name,name) == 0)
@@ -31,6 +32,13 @@ Node* search(Node* head,char* name) {
         cursor = cursor->next;
     }
     return NULL;
+}
+
+void printNode(Node* node) {
+    printf("%s, %d, %d -> ", node->name, node->token, node->numPlace);
+    if(node->next != NULL) {
+        printNode(node->next);
+    }
 }
 
 TNode* createTNode(char* name) {

@@ -87,17 +87,52 @@ deinit_sylvan()
  * The default implementation right now, is to print several
  * statistics of the parsed Petri net.
  */
+
+void visualize_bdd(BDD bdd) {
+    char b[256];
+    snprintf(b, 256, "./BDD.dot");
+    FILE *f = fopen(b, "w+");
+    mtbdd_fprintdot(f, bdd);
+    fclose(f);
+}
+
+// creates an ithvar OR and nithvar.
+BDD create_var(Node* cur){
+    LACE_ME;
+
+    BDD var;
+    if (cur->token == 1) {
+        var = sylvan_ithvar(cur->numPlace);
+    } else {
+        var = sylvan_nithvar(cur->numPlace);
+    }
+    sylvan_protect(&var);
+    return var;
+}
+
 void
 do_ss_things(andl_context_t *andl_context)
 {
+    LACE_ME;
+
     warn("The name of the Petri net is: %s", andl_context->name);
     warn("There are %d transitions", andl_context->num_transitions);
     warn("There are %d places", andl_context->num_places);
     warn("There are %d in arcs", andl_context->num_in_arcs);
     warn("There are %d out arcs", andl_context->num_out_arcs);
 
-//    printf("%s", search(andl_context->head, "Fork_5")->name);
-    printTNode(andl_context->tHead);
+    // create initstate
+    Node* cursor = andl_context->head;
+    BDD initState = create_var(cursor);
+    sylvan_protect(&initState);
+    cursor = cursor->next;
+    while(cursor!=NULL) {
+        printf("%s", cursor->name);
+        initState = sylvan_and(create_var(cursor), initState);
+        cursor = cursor->next;
+    }
+
+    visualize_bdd(initState);
 }
 
 /**

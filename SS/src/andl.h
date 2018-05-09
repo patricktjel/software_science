@@ -32,6 +32,7 @@ Node* add_node(Node* first, Node* toAdd);
 
 Node* search(Node* head,char* data);
 
+void printNode(Node* node);
 
 //Condition node for a linked list
 typedef struct cnode CNode;
@@ -41,7 +42,7 @@ struct cnode {
     CNode *next;
 };
 
-//transition node for a linked list
+//transition node for a linked list, with inside a linkedlist of nodition nodes.
 typedef struct tnode TNode;
 struct tnode {
     char* name;
