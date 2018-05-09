@@ -8,13 +8,11 @@ autom4te.cache
 /depcomp
 /install-sh
 /missing
-.deps/
 /ylwrap
 /aclocal.m4
 stamp-h1
 
 *.o
-m4
 autotools
 /config.guess
 /config.sub
