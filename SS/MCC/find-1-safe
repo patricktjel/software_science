@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cat $1 | \
+   awk -F',' '$3 == "StateSpace"' | \
+   awk -F',' '$4~/^[^ ]+ [^ ]+ 1 [^ ]+$/' | \
+   cut -d, -f2 | sort | uniq | grep '\-PT\-' | grep -v 'S_'
+

@@ -1,0 +1,58 @@
+language: cpp
+
+compiler:
+- clang
+- gcc
+
+os:
+- linux
+- osx
+
+dist: trusty
+sudo: false
+
+cache:
+  directories:
+    - $HOME/deps
+
+addons:
+  apt:
+    packages:
+      - libnuma-dev
+      - libhwloc-dev
+      - libgmp-dev
+
+before_install:
+  - export SYLVAN_VERSION="1.2.0"
+  - export SYLVAN_URL="https://github.com/trolando/sylvan/archive/v$SYLVAN_VERSION.tar.gz"
+  - export SYLVAN_NAME="sylvan-$SYLVAN_VERSION"
+  - export PKG_CONFIG_PATH="$HOME/deps/lib/pkgconfig"
+
+install:
+  # update brew
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update &&
+    brew install
+    bison
+    hwloc; fi
+  # install Sylvan from source
+  - if [ ! -f "$HOME/deps/lib/libsylvan.a" ]; then
+    wget "$SYLVAN_URL" -P /tmp &&
+    tar -xf "/tmp/v$SYLVAN_VERSION.tar.gz" -C /tmp &&
+    pushd /tmp/sylvan-$SYLVAN_VERSION &&
+    mkdir build &&
+    cd build &&
+    cmake .. -DBUILD_SHARED_LIBS=OFF -DSYLVAN_BUILD_EXAMPLES=OFF -DSYLVAN_BUILD_DOCS=OFF -DSYLVAN_STATS=OFF -DCMAKE_INSTALL_PREFIX="$HOME/deps" -DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG -Wno-error=deprecated-declarations" &&
+    make &&
+    make install &&
+    popd; fi
+
+before_script:
+  - export PKG_CONFIG_PATH="$HOME/deps/lib/pkgconfig"
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/bison/bin:$PATH"; fi
+
+script:
+  - ./ssreconf
+  - ./configure
+  - make
+  - src/ss examples/model.andl
+
