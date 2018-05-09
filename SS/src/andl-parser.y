@@ -152,6 +152,10 @@ tdec
                 warn("out of memory");
                 YYABORT;
             }
+
+            TNode* tNode = createTNode(strdup($1));
+            andl_context->tHead = addTNode(andl_context->tHead, tNode);
+
             free($1);
         } arcs transition_function SEMICOLON
     |   IDENT error SEMICOLON {
@@ -181,8 +185,9 @@ arc
                     $4);
                 andl_context->error = 1;
             }
-            /* Here you can do something with
-             * andl_context->current_trans */
+
+            andl_context->tHead = addCNode(andl_context->tHead, strdup($2), $3);
+
             if ($3 == ARC_IN) {
                 andl_context->num_in_arcs++;
             } else { // $3 == ARC_OUT

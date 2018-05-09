@@ -32,6 +32,33 @@ Node* add_node(Node* first, Node* toAdd);
 
 Node* search(Node* head,char* data);
 
+
+//Condition node for a linked list
+typedef struct cnode CNode;
+struct cnode {
+    char* name;
+    int op;
+    CNode *next;
+};
+
+//transition node for a linked list
+typedef struct tnode TNode;
+struct tnode {
+    char* name;
+    CNode* conditions;
+    TNode* next;
+};
+
+TNode* createTNode(char* name);
+
+TNode* addTNode(TNode* head, TNode* add);
+
+TNode* addCNode(TNode* node, char* name, int op);
+
+void printTNode(TNode* node);
+
+void printCNode(CNode* node);
+
 /**
  * \brief A struct to store information while parsing
  * an andl file.
@@ -60,6 +87,8 @@ typedef struct {
 
     //Random number
     Node* head;
+
+    TNode* tHead;
 } andl_context_t;
 
 #endif

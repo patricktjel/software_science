@@ -508,8 +508,8 @@ static const yytype_uint8 yyrline[] =
 {
        0,    76,    76,    87,    88,    92,    93,    94,    95,    99,
      103,   107,   111,   115,   116,   121,   130,   137,   138,   143,
-     143,   157,   163,   168,   169,   170,   175,   193,   197,   204,
-     205,   206,   213,   221
+     143,   161,   167,   172,   173,   174,   179,   198,   202,   209,
+     210,   211,   218,   226
 };
 #endif
 
@@ -1463,22 +1463,26 @@ yyreduce:
                 warn("out of memory");
                 YYABORT;
             }
+
+            TNode* tNode = createTNode(strdup((yyvsp[-3].text)));
+            andl_context->tHead = addTNode(andl_context->tHead, tNode);
+
             free((yyvsp[-3].text));
         }
-#line 1469 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1473 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 157 "andl-parser.y" /* yacc.c:1646  */
+#line 161 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Something went wrong with transition %s on line %d", (yyvsp[-2].text), (yylsp[-2]).first_line);
             andl_context->error = 1;
         }
-#line 1478 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1482 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 175 "andl-parser.y" /* yacc.c:1646  */
+#line 179 "andl-parser.y" /* yacc.c:1646  */
     {
             if ((yyvsp[-1].number) != 1) {
                 warn(
@@ -1488,8 +1492,9 @@ yyreduce:
                     (yyvsp[-1].number));
                 andl_context->error = 1;
             }
-            /* Here you can do something with
-             * andl_context->current_trans */
+
+            andl_context->tHead = addCNode(andl_context->tHead, strdup((yyvsp[-3].text)), (yyvsp[-2].dir));
+
             if ((yyvsp[-2].dir) == ARC_IN) {
                 andl_context->num_in_arcs++;
             } else { // $3 == ARC_OUT
@@ -1497,49 +1502,49 @@ yyreduce:
             }
            free((yyvsp[-3].text));
         }
-#line 1501 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1506 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 193 "andl-parser.y" /* yacc.c:1646  */
+#line 198 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Missing identifier on line %d", (yylsp[-2]).first_line);
             andl_context->error = 1;
         }
-#line 1510 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1515 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 197 "andl-parser.y" /* yacc.c:1646  */
+#line 202 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Something went wrong with arc %s on line %d", (yyvsp[-2].text), (yylsp[-3]).first_line);
             andl_context->error = 1;
         }
-#line 1519 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1524 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 206 "andl-parser.y" /* yacc.c:1646  */
+#line 211 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Constant assign arcs not yet supported.");
             andl_context->error = 1;
         }
-#line 1528 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1533 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 213 "andl-parser.y" /* yacc.c:1646  */
+#line 218 "andl-parser.y" /* yacc.c:1646  */
     {
             if ((yyvsp[0].number) != 1) {
                 warn("This is not a 1-safe Petri net!");
                 andl_context->error = 1;
             }
         }
-#line 1539 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1544 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
 
-#line 1543 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1548 "ss-andl-parser.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1774,5 +1779,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 225 "andl-parser.y" /* yacc.c:1906  */
+#line 230 "andl-parser.y" /* yacc.c:1906  */
 
