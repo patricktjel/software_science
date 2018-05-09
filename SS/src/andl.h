@@ -30,7 +30,7 @@ Node* new_node(char* name, int token, int numPlace);
 
 Node* add_node(Node* first, Node* toAdd);
 
-Node* find_node(Node* first, char* name);
+Node* search(Node* head,char* data);
 
 /**
  * \brief A struct to store information while parsing
@@ -59,7 +59,7 @@ typedef struct {
     int error;
 
     //Random number
-    Node* vars;
+    Node* head;
 } andl_context_t;
 
 #endif

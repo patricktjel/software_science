@@ -120,8 +120,11 @@ pdecs
 pdec
     :   IDENT ASSIGN NUMBER SEMICOLON {
             andl_context->num_places++;
-            Node* n = new_node($1, $3, andl_context->num_places);
-            andl_context->vars = n;
+
+
+            Node* n = new_node(strdup($1), $3, andl_context->num_places);
+            andl_context->head = add_node(andl_context->head, n);
+
             free($1);
         }
     |   IDENT error SEMICOLON {
