@@ -1,8 +1,2 @@
-ss-andl-parser.c
-ss-andl-parser.h
-config.h
 ss
-andl-lexer.c
-andl-lexer.h
 mutex.log
-mutex.pdf
