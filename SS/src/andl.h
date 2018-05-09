@@ -16,6 +16,22 @@ typedef enum {
     ARC_OUT,
 } arc_dir_t;
 
+
+//Crude linked list implementation
+typedef struct node Node;
+struct node {
+    char* name;
+    int token;
+    int numPlace;
+    Node *next;
+};
+
+Node* new_node(char* name, int token, int numPlace);
+
+Node* add_node(Node* first, Node* toAdd);
+
+Node* find_node(Node* first, char* name);
+
 /**
  * \brief A struct to store information while parsing
  * an andl file.
@@ -39,8 +55,11 @@ typedef struct {
     // the number of transition-place arcs in the Petri net
     int num_out_arcs;
 
-    // whether an error has occured during parsing
+    // whether an error has occurred during parsing
     int error;
+
+    //Random number
+    Node* vars;
 } andl_context_t;
 
 #endif

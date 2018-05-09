@@ -95,6 +95,8 @@ do_ss_things(andl_context_t *andl_context)
     warn("There are %d places", andl_context->num_places);
     warn("There are %d in arcs", andl_context->num_in_arcs);
     warn("There are %d out arcs", andl_context->num_out_arcs);
+
+    printf("%s", andl_context->vars->name);
 }
 
 /**

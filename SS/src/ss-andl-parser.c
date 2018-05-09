@@ -507,9 +507,9 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    76,    76,    87,    88,    92,    93,    94,    95,    99,
-     103,   107,   111,   115,   116,   121,   125,   132,   133,   138,
-     138,   152,   158,   163,   164,   165,   170,   188,   192,   199,
-     200,   201,   208,   216
+     103,   107,   111,   115,   116,   121,   127,   134,   135,   140,
+     140,   154,   160,   165,   166,   167,   172,   190,   194,   201,
+     202,   203,   210,   218
 };
 #endif
 
@@ -1430,22 +1430,24 @@ yyreduce:
 #line 121 "andl-parser.y" /* yacc.c:1646  */
     {
             andl_context->num_places++;
+            Node* n = new_node((yyvsp[-3].text), (yyvsp[-1].number), andl_context->num_places);
+            andl_context->vars = n;
             free((yyvsp[-3].text));
         }
-#line 1436 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1438 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 125 "andl-parser.y" /* yacc.c:1646  */
+#line 127 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Something went wrong with place %s on line %d", (yyvsp[-2].text), (yylsp[-2]).first_line);
             andl_context->error = 1;
         }
-#line 1445 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1447 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 138 "andl-parser.y" /* yacc.c:1646  */
+#line 140 "andl-parser.y" /* yacc.c:1646  */
     {
             andl_context->num_transitions++;
             /* free the string of the previous transition */
@@ -1460,20 +1462,20 @@ yyreduce:
             }
             free((yyvsp[-3].text));
         }
-#line 1464 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1466 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 152 "andl-parser.y" /* yacc.c:1646  */
+#line 154 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Something went wrong with transition %s on line %d", (yyvsp[-2].text), (yylsp[-2]).first_line);
             andl_context->error = 1;
         }
-#line 1473 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1475 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 170 "andl-parser.y" /* yacc.c:1646  */
+#line 172 "andl-parser.y" /* yacc.c:1646  */
     {
             if ((yyvsp[-1].number) != 1) {
                 warn(
@@ -1492,49 +1494,49 @@ yyreduce:
             }
            free((yyvsp[-3].text));
         }
-#line 1496 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1498 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 188 "andl-parser.y" /* yacc.c:1646  */
+#line 190 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Missing identifier on line %d", (yylsp[-2]).first_line);
             andl_context->error = 1;
         }
-#line 1505 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1507 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 192 "andl-parser.y" /* yacc.c:1646  */
+#line 194 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Something went wrong with arc %s on line %d", (yyvsp[-2].text), (yylsp[-3]).first_line);
             andl_context->error = 1;
         }
-#line 1514 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1516 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 201 "andl-parser.y" /* yacc.c:1646  */
+#line 203 "andl-parser.y" /* yacc.c:1646  */
     {
             warn("Constant assign arcs not yet supported.");
             andl_context->error = 1;
         }
-#line 1523 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1525 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 208 "andl-parser.y" /* yacc.c:1646  */
+#line 210 "andl-parser.y" /* yacc.c:1646  */
     {
             if ((yyvsp[0].number) != 1) {
                 warn("This is not a 1-safe Petri net!");
                 andl_context->error = 1;
             }
         }
-#line 1534 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1536 "ss-andl-parser.c" /* yacc.c:1646  */
     break;
 
 
-#line 1538 "ss-andl-parser.c" /* yacc.c:1646  */
+#line 1540 "ss-andl-parser.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1769,5 +1771,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 220 "andl-parser.y" /* yacc.c:1906  */
+#line 222 "andl-parser.y" /* yacc.c:1906  */
 
