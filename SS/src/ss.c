@@ -182,6 +182,8 @@ do_ss_things(andl_context_t *andl_context)
             //create the condition for the map.
             map = sylvan_map_add(map, node->numPlace + andl_context->num_places, sylvan_ithvar(node->numPlace));
             c_cursor = c_cursor->next;
+
+            warn("cnode %d of %d", node->numPlace, andl_context->num_places);
         }
 
         transitions[i] = tran;
@@ -189,6 +191,8 @@ do_ss_things(andl_context_t *andl_context)
         transitions_map[i] = map;
 
         t_cursor = t_cursor->next;
+
+        warn("%d of %d", i, andl_context->num_transitions);
     }
 
     //    while
