@@ -1,3 +1,12 @@
+De volgende werken tijdens het testen:
+ * RsAllocation-PT-R002C002
+ * DatabaseWithMutex-PT-02
+ * RwMutex-PT-r0010w0010
+ * philosophers
+Dit zijn de wat kleinere, de grotere werken niet zoals;
+ * Parking-PT-104
+
+
 # Software Science Project 1, assignment 2
 
 ## Introduction
