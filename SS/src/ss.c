@@ -110,6 +110,21 @@ BDD create_var(Node* cur){
     return var;
 }
 
+BDD create_prime_var(Node* cur, int places){
+    LACE_ME;
+
+    int name = cur->numPlace + places;
+
+    BDD var;
+    if (cur->token == 1) {
+        var = sylvan_nithvar(name);
+    } else {
+        var = sylvan_ithvar(name);
+    }
+    sylvan_protect(&var);
+    return var;
+}
+
 void
 do_ss_things(andl_context_t *andl_context)
 {
@@ -126,13 +141,84 @@ do_ss_things(andl_context_t *andl_context)
     BDD initState = create_var(cursor);
     sylvan_protect(&initState);
     cursor = cursor->next;
-    while(cursor!=NULL) {
-        printf("%s", cursor->name);
+    while(cursor != NULL) {
         initState = sylvan_and(create_var(cursor), initState);
         cursor = cursor->next;
     }
 
-    visualize_bdd(initState);
+    BDD transitions[andl_context->num_transitions];
+    BDD transitions_set[andl_context->num_transitions];
+    BDD transitions_map[andl_context->num_transitions];
+
+    TNode* t_cursor = andl_context->tHead;
+
+    for (int i = 0; i < andl_context->num_transitions; i++) {
+
+        CNode* c_cursor = t_cursor->conditions;
+
+        BDD tran = sylvan_true;
+        sylvan_protect(&tran);
+        BDD set = sylvan_set_empty();
+        sylvan_protect(&set);
+        BDDMAP map = sylvan_map_empty();
+        sylvan_protect(&map);
+        while (c_cursor != NULL) {
+
+            //create condition and add it to the tran set.
+            Node* node = search(andl_context->head, c_cursor->name);
+
+            if (c_cursor->op) {
+                node->token = 0;
+            } else {
+                node->token = 1;
+            }
+
+            BDD condition = sylvan_and(create_var(node), create_prime_var(node, andl_context->num_places));
+            tran = sylvan_and(tran, condition);
+
+            //create the condition for the set.
+            set = sylvan_set_add(set, node->numPlace);
+
+            //create the condition for the map.
+            map = sylvan_map_add(map, node->numPlace + andl_context->num_places, sylvan_ithvar(node->numPlace));
+            c_cursor = c_cursor->next;
+        }
+
+        transitions[i] = tran;
+        transitions_set[i] = set;
+        transitions_map[i] = map;
+
+        t_cursor = t_cursor->next;
+    }
+
+    //    while
+    BDD cur = initState;
+    BDD vis = cur;
+    do {
+        vis = cur;
+        for (int i = 0; i < andl_context->num_transitions; i = i + 1) {
+            BDD r = sylvan_and(cur, transitions[i]);
+
+            r = sylvan_exists(r, transitions_set[i]);
+            r = sylvan_compose(r, transitions_map[i]);
+
+            cur = sylvan_or(cur, r);
+        }
+    } while (cur != vis);
+
+    //create result set
+    BDD result = sylvan_set_empty();
+    cursor = andl_context->head;
+    while (cursor != NULL) {
+        result = sylvan_set_add(result, cursor->numPlace);
+        cursor = cursor->next;
+    }
+
+    //print result
+    warn("satcount of: %lf", sylvan_satcount(cur, result));
+    warn("nodecount of: %lu", sylvan_nodecount(cur));
+
+    visualize_bdd(cur);
 }
 
 /**
