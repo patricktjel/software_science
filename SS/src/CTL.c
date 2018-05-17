@@ -51,12 +51,16 @@ Tree_node* add_Tree_node(Tree_node* parent, char* to_add) {
     return parent;
 }
 
+
+
 void print_Tree_node(Tree_node* node) {
+    if (node == NULL) {
+        return;
+    }
     print_L_node(node->data);
-    if(node->left != NULL) {
-        print_Tree_node(node->left);
-    }
-    if(node->right != NULL) {
-        print_Tree_node(node->right);
-    }
+    printf("\n");
+    print_Tree_node(node -> left);
+    printf("\n");
+    print_Tree_node(node ->right);
+    printf("\n");
 }

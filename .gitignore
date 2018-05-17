@@ -64,5 +64,5 @@ CTestTestfile.cmake
 build
 
 ###IDEA
-*/.idea
+**/.idea
 *.dot

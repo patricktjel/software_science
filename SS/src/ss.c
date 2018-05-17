@@ -246,36 +246,29 @@ parse_formula(xmlNode *node, Tree_node* parent)
     }
     // parse forAll
     else if (xmlStrcmp(node->name, (const xmlChar*) "all-paths") == 0) {
-        fprintf(stderr, "A ");
         parent = add_Tree_node(parent, "A");
         res = parse_formula(xmlFirstElementChild(node), parent);
     // parse Exists
     } else if (xmlStrcmp(node->name, (const xmlChar*) "exists-path") == 0) {
-        fprintf(stderr, "E ");
         parent = add_Tree_node(parent, "E");
         res = parse_formula(xmlFirstElementChild(node), parent);
     // parse Globally
     } else if (xmlStrcmp(node->name, (const xmlChar*) "globally") == 0) {
-        fprintf(stderr, "G ");
         parent = add_Tree_node(parent, "G");
         res = parse_formula(xmlFirstElementChild(node), parent);
     // parse Finally
     } else if (xmlStrcmp(node->name, (const xmlChar*) "finally") == 0) {
-        fprintf(stderr, "F ");
         parent = add_Tree_node(parent, "F");
         res = parse_formula(xmlFirstElementChild(node), parent);
     // parse neXt
     } else if (xmlStrcmp(node->name, (const xmlChar*) "next") == 0) {
-        fprintf(stderr, "X ");
         parent = add_Tree_node(parent, "X");
         res = parse_formula(xmlFirstElementChild(node), parent);
     // parse Until
     } else if (xmlStrcmp(node->name, (const xmlChar*) "until") == 0) {
-        fprintf(stderr, "(");
+        parent = add_Tree_node(parent, "U");
         res = parse_formula(xmlFirstElementChild(node), parent);
-        fprintf(stderr, ") U (");
         res |= parse_formula(xmlNextElementSibling(xmlFirstElementChild(node)), parent);
-        fprintf(stderr, ")");
     // parse before
     } else if (xmlStrcmp(node->name, (const xmlChar*) "before") == 0) {
         res = parse_formula(xmlFirstElementChild(node), parent);
@@ -284,30 +277,24 @@ parse_formula(xmlNode *node, Tree_node* parent)
         res = parse_formula(xmlFirstElementChild(node), parent);
     // parse negation
     } else if (xmlStrcmp(node->name, (const xmlChar*) "negation") == 0) {
-        fprintf(stderr, "!(");
+        parent = add_Tree_node(parent, "!");
         res = parse_formula(xmlFirstElementChild(node), parent);
-        fprintf(stderr, ")");
     // parse conjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "conjunction") == 0) {
-        fprintf(stderr, "(");
+        parent = add_Tree_node(parent, "&&");
         res = parse_formula(xmlFirstElementChild(node), parent);
-        fprintf(stderr, ") && (");
         res |= parse_formula(xmlNextElementSibling(xmlFirstElementChild(node)), parent);
-        fprintf(stderr, ")");
     // parse disjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "disjunction") == 0) {
-        fprintf(stderr, "(");
+        parent = add_Tree_node(parent, "||");
         res = parse_formula(xmlFirstElementChild(node), parent);
-        fprintf(stderr, ") || (");
         res |= parse_formula(xmlNextElementSibling(xmlFirstElementChild(node)), parent);
-        fprintf(stderr, ")");
     // parse is-fireable: atomic predicate!
     } else if (xmlStrcmp(node->name, (const xmlChar*) "is-fireable") == 0) {
-        fprintf(stderr, "is-fireable(");
         res = parse_formula(xmlFirstElementChild(node), parent);
-        fprintf(stderr, ")");
     // parse transition (part of the atomic predicate)
     } else if (xmlStrcmp(node->name, (const xmlChar*) "transition") == 0) {
+//        parent = add_Tree_node(parent, "A");
         for (xmlNode *transition = node; transition != NULL;
                 transition = xmlNextElementSibling(transition)) {
             fprintf(stderr, "%s,", xmlNodeGetContent(transition));
@@ -356,7 +343,7 @@ parse_xml(xmlNode *node)
     } else if (xmlStrcmp(node->name, (const xmlChar*) "formula") == 0) {
         warn("Parsing formula...");
         res = parse_formula(xmlFirstElementChild(node), NULL);
-//        print_Tree_node(res);
+        printf("\n");
         print_Tree_node(root);
         printf("\n");
     // node not recognized
