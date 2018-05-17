@@ -56,6 +56,24 @@ TNode* addTNode(TNode* head, TNode* add) {
 }
 
 TNode* addCNode(TNode* tnode, char* name, int op) {
+    CNode* prev = NULL;
+    CNode* condition = tnode->conditions;
+
+    while (condition != NULL) {
+        if (strcmp(condition->name, name) == 0) {
+           if (prev == NULL) {
+               tnode->conditions = condition->next;
+               return tnode;
+           } else {
+               prev->next = condition->next;
+               return tnode;
+           }
+        }
+        prev = condition;
+        condition = condition->next;
+    }
+
+
     CNode* node = malloc(sizeof(CNode));
     node->name = name;
     node->op = op;

@@ -11,6 +11,10 @@
 #include <util.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <stdbool.h>
+
+
+bool debug = true;
 
 /**
  * Load the andl file in \p name.
@@ -107,7 +111,6 @@ BDD create_var(Node* cur){
     } else {
         var = sylvan_nithvar(cur->numPlace);
     }
-    sylvan_protect(&var);
     return var;
 }
 
@@ -122,7 +125,6 @@ BDD create_prime_var(Node* cur, int places){
     } else {
         var = sylvan_ithvar(name);
     }
-    sylvan_protect(&var);
     return var;
 }
 
@@ -163,6 +165,7 @@ do_ss_things(andl_context_t *andl_context)
         sylvan_protect(&set);
         BDDMAP map = sylvan_map_empty();
         sylvan_protect(&map);
+
         while (c_cursor != NULL) {
 
             //create condition and add it to the tran set.
@@ -174,7 +177,12 @@ do_ss_things(andl_context_t *andl_context)
                 node->token = 1;
             }
 
-            BDD condition = sylvan_and(create_var(node), create_prime_var(node, andl_context->num_places));
+            BDD var = create_var(node);
+            sylvan_protect(&var);
+            BDD prime = create_prime_var(node, andl_context->num_places);
+            sylvan_protect(&prime);
+
+            BDD condition = sylvan_and(var, prime);
             tran = sylvan_and(tran, condition);
 
             //create the condition for the set.
@@ -182,23 +190,33 @@ do_ss_things(andl_context_t *andl_context)
 
             //create the condition for the map.
             map = sylvan_map_add(map, node->numPlace + andl_context->num_places, sylvan_ithvar(node->numPlace));
-            c_cursor = c_cursor->next;
 
-//            warn("cnode %d of %d", node->numPlace, andl_context->num_places);
+            if(debug) warn("cnode %d of %d (%s done)", node->numPlace, andl_context->num_places, c_cursor->name);
+
+            c_cursor = c_cursor->next;
+            sylvan_unprotect(&var);
+            sylvan_unprotect(&prime);
+
         }
 
         transitions[i] = tran;
         transitions_set[i] = set;
         transitions_map[i] = map;
 
+        if(debug) warn("%d of %d (%s DONE)", i+1, andl_context->num_transitions, t_cursor->name);
+
         t_cursor = t_cursor->next;
 
-//        warn("%d of %d", i, andl_context->num_transitions);
     }
+
+    if(debug) warn("Done building transition BDDS");
 
     //    while
     BDD cur = initState;
+    sylvan_protect(&cur);
     BDD vis = cur;
+    sylvan_protect(&vis);
+
     do {
         vis = cur;
         for (int i = 0; i < andl_context->num_transitions; i = i + 1) {
@@ -211,19 +229,27 @@ do_ss_things(andl_context_t *andl_context)
         }
     } while (cur != vis);
 
+    if (debug) warn("Done building state space");
+
     //create result set
     BDD result = sylvan_set_empty();
+    sylvan_protect(&result);
     cursor = andl_context->head;
     while (cursor != NULL) {
         result = sylvan_set_add(result, cursor->numPlace);
         cursor = cursor->next;
     }
 
+    if (debug) warn("Done result set for satcount");
+
     //print result
     warn("satcount of: %lf", sylvan_satcount(cur, result));
     warn("nodecount of: %lu", sylvan_nodecount(cur));
 
     visualize_bdd(cur);
+    sylvan_unprotect(&cur);
+    sylvan_unprotect(&vis);
+    sylvan_unprotect(&result);
 }
 
 /**
