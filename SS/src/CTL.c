@@ -48,7 +48,7 @@ Tree_node* add_Tree_node(Tree_node* parent, char* to_add) {
         parent->right = node;
     }
 
-    return parent;
+    return node;
 }
 
 
