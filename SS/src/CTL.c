@@ -75,3 +75,10 @@ void print_Tree_node(Tree_node* node, int depth) {
         printf("\n");
     }
 }
+
+int formula_index = 0;
+
+void add_tree_to_array() {
+    formula[formula_index] = root;
+    formula_index = formula_index + 1;
+}

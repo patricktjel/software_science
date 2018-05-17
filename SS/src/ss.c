@@ -346,6 +346,7 @@ parse_xml(xmlNode *node)
         res = parse_formula(xmlFirstElementChild(node), NULL);
         printf("\n");
         print_Tree_node(root, 0);
+        add_tree_to_array();
         printf("\n");
     // node not recognized
     } else {
@@ -408,6 +409,8 @@ int main(int argc, char** argv)
         warn("Usage: %s <petri-net>.andl [<CTL-formulas>.xml]", argv[0]);
         res = 1;
     }
+
+    print_Tree_node(formula[15], 0);
 
     return res;
 }

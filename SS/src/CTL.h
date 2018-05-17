@@ -29,5 +29,7 @@ Tree_node* add_Tree_data(Tree_node* parent, L_node* data);
 void print_Tree_node(Tree_node* node, int depth);
 
 Tree_node* root;
+Tree_node* formula[16];
+void add_tree_to_array();
 
 #endif //SS_CTL_H
