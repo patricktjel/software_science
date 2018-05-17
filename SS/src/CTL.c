@@ -53,14 +53,17 @@ Tree_node* add_Tree_node(Tree_node* parent, char* to_add) {
 
 
 
-void print_Tree_node(Tree_node* node) {
+void print_Tree_node(Tree_node* node, int depth) {
     if (node == NULL) {
         return;
     }
+    for (int i = 0; i < depth; i++){
+        printf("\t");
+    }
     print_L_node(node->data);
     printf("\n");
-    print_Tree_node(node -> left);
+    print_Tree_node(node -> left, depth + 1);
     printf("\n");
-    print_Tree_node(node ->right);
+    print_Tree_node(node ->right, depth + 1);
     printf("\n");
 }

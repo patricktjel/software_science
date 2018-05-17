@@ -344,7 +344,7 @@ parse_xml(xmlNode *node)
         warn("Parsing formula...");
         res = parse_formula(xmlFirstElementChild(node), NULL);
         printf("\n");
-        print_Tree_node(root);
+        print_Tree_node(root, 0);
         printf("\n");
     // node not recognized
     } else {
