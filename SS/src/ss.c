@@ -464,6 +464,14 @@ int main(int argc, char** argv)
             if (argc == 3) {
                 const char *formulas = argv[2];
                 res = load_xml(formulas);
+
+                for (int i = 0; i < 16; i++) {
+                    Tree_node* result = check_formula(formula[i]);
+                    if (result != NULL) {
+                        formula[i] = result;
+                    }
+                }
+
                 if (res) warn("Unable to load xml '%s'", formulas);
             }
             init_sylvan();
@@ -474,13 +482,6 @@ int main(int argc, char** argv)
     } else {
         warn("Usage: %s <petri-net>.andl [<CTL-formulas>.xml]", argv[0]);
         res = 1;
-    }
-
-    for (int i = 0; i < 16; i++) {
-        Tree_node* result = check_formula(formula[i]);
-        if (result != NULL) {
-            formula[i] = result;
-        }
     }
 
     return res;
