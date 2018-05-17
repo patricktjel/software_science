@@ -345,7 +345,7 @@ parse_xml(xmlNode *node)
         warn("Parsing formula...");
         res = parse_formula(xmlFirstElementChild(node), NULL);
         printf("\n");
-        print_Tree_node(root, 0);
+//        print_Tree_node(root, 0);
         add_tree_to_array();
         printf("\n");
     // node not recognized
@@ -379,6 +379,72 @@ load_xml(const char* name)
     return res;
 }
 
+Tree_node* check_formula(Tree_node* formula) {
+    if (formula == NULL) {
+        return NULL;
+    }
+
+    Tree_node* result = check_formula(formula->left);
+    if (result != NULL) {
+        formula->left = result;
+    }
+    result = check_formula(formula->right);
+    if (result != NULL) {
+        formula->right = result;
+    }
+
+    Tree_node* start = NULL;
+
+//  replace EF
+    if (strcmp(formula->data->symbol, "E") == 0) {
+        char* symbol = formula->left->data->symbol;
+        if (strcmp(symbol,"F") == 0) {
+            start = add_Tree_node(NULL, "E");
+            Tree_node* tree = add_Tree_node(start, "U");
+            add_Tree_node(tree, "1");
+            tree->right = formula->left->left;
+        }
+    }
+
+    if (strcmp(formula->data->symbol, "A") == 0) {
+        char *symbol = formula->left->data->symbol;
+
+//      replace AX
+        if (strcmp(symbol, "X") == 0) {
+            start = add_Tree_node(NULL, "!");
+            Tree_node *tree = add_Tree_node(start, "E");
+            tree = add_Tree_node(tree, "X");
+            tree = add_Tree_node(tree, "!");
+            tree->left = formula->left->left;
+//      replace AG
+        } else if (strcmp(symbol, "G") == 0) {
+            start = add_Tree_node(NULL, "!");
+            Tree_node *tree = add_Tree_node(start, "E");
+            tree = add_Tree_node(tree, "U");
+            add_Tree_node(tree, "1");
+            tree = add_Tree_node(tree, "!");
+            tree->left = formula->left->left;
+//      replace AF
+        } else if (strcmp(symbol, "F") == 0) {
+            start = add_Tree_node(NULL, "!");
+            Tree_node* tree = add_Tree_node(start, "E");
+            tree = add_Tree_node(tree, "G");
+            tree = add_Tree_node(tree, "!");
+            tree->left = formula->left->left;
+//       replace AR
+        } else if (strcmp(symbol, "U") == 0) {
+            start = add_Tree_node(NULL, "!");
+            Tree_node* tree = add_Tree_node(start, "E");
+            tree = add_Tree_node(tree, "R");
+            add_Tree_node(tree, "!");
+            add_Tree_node(tree, "!");
+            tree->left->left = formula->left->left;
+            tree->right->left = formula->left->right;
+        }
+    }
+    return start;
+}
+
 /**
  * \brief main. First parse the .andl file is parsed. And optionally parse the
  * XML file next.
@@ -410,7 +476,12 @@ int main(int argc, char** argv)
         res = 1;
     }
 
-    print_Tree_node(formula[15], 0);
+    for (int i = 0; i < 16; i++) {
+        Tree_node* result = check_formula(formula[i]);
+        if (result != NULL) {
+            formula[i] = result;
+        }
+    }
 
     return res;
 }
