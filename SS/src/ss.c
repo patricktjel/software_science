@@ -294,11 +294,12 @@ parse_formula(xmlNode *node, Tree_node* parent)
         res = parse_formula(xmlFirstElementChild(node), parent);
     // parse transition (part of the atomic predicate)
     } else if (xmlStrcmp(node->name, (const xmlChar*) "transition") == 0) {
-//        parent = add_Tree_node(parent, "A");
-        for (xmlNode *transition = node; transition != NULL;
-                transition = xmlNextElementSibling(transition)) {
+        L_node* data = NULL;
+        for (xmlNode *transition = node; transition != NULL; transition = xmlNextElementSibling(transition)) {
+            data = add_L_node(data, xmlNodeGetContent(transition));
             fprintf(stderr, "%s,", xmlNodeGetContent(transition));
         }
+        add_Tree_data(parent, data);
     } else {
         res = 1;
         warn("Invalid xml node '%s'", node->name);

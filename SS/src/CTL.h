@@ -24,6 +24,8 @@ Tree_node* create_Tree_node(L_node *data);
 
 Tree_node* add_Tree_node(Tree_node* parent, char* to_add);
 
+Tree_node* add_Tree_data(Tree_node* parent, L_node* data);
+
 void print_Tree_node(Tree_node* node, int depth);
 
 Tree_node* root;

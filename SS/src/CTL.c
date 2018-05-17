@@ -14,7 +14,7 @@ L_node* create_L_node(char* symbol) {
 L_node* add_L_node(L_node* first, char* symbol) {
     L_node* node = create_L_node(symbol);
     node->next = first;
-    return  node;
+    return node;
 }
 
 Tree_node* create_Tree_node(L_node *data) {
@@ -34,7 +34,13 @@ void print_L_node(L_node* node) {
 }
 
 Tree_node* add_Tree_node(Tree_node* parent, char* to_add) {
-    Tree_node* node = create_Tree_node(create_L_node(to_add));
+    L_node* node = create_L_node(to_add);
+
+    return add_Tree_data(parent, node);
+}
+
+Tree_node* add_Tree_data(Tree_node* parent, L_node* data) {
+    Tree_node* node = create_Tree_node(data);
 
     // if there is no parent yet, we just created the root.
     if (parent == NULL) {
@@ -52,7 +58,6 @@ Tree_node* add_Tree_node(Tree_node* parent, char* to_add) {
 }
 
 
-
 void print_Tree_node(Tree_node* node, int depth) {
     if (node == NULL) {
         return;
@@ -62,8 +67,11 @@ void print_Tree_node(Tree_node* node, int depth) {
     }
     print_L_node(node->data);
     printf("\n");
+
     print_Tree_node(node -> left, depth + 1);
-    printf("\n");
     print_Tree_node(node ->right, depth + 1);
-    printf("\n");
+    if ( node->left  != NULL && (node->left->left != NULL && node->left->right != NULL) ||
+        node->right != NULL && (node->right->left != NULL && node->right->right != NULL)) {
+        printf("\n");
+    }
 }
