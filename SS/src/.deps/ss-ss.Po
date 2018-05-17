@@ -41,7 +41,7 @@ ss-ss.o: ss.c /usr/include/stdc-predef.h config.h /usr/include/stdio.h \
  /usr/local/include/sylvan_common.h /usr/local/include/sylvan_stats.h \
  /usr/local/include/sylvan_mtbdd.h /usr/local/include/sylvan_mt.h \
  /usr/local/include/sylvan_bdd.h /usr/local/include/sylvan_ldd.h andl.h \
- andl-lexer.h ss-andl-parser.h util.h /usr/include/string.h \
+ CTL.h andl-lexer.h ss-andl-parser.h util.h /usr/include/string.h \
  /usr/include/x86_64-linux-gnu/bits/string.h \
  /usr/include/x86_64-linux-gnu/bits/string2.h \
  /usr/include/x86_64-linux-gnu/bits/string3.h /usr/include/errno.h \
@@ -219,6 +219,8 @@ config.h:
 /usr/local/include/sylvan_ldd.h:
 
 andl.h:
+
+CTL.h:
 
 andl-lexer.h:
 

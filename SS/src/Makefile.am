@@ -3,7 +3,7 @@
 bin_PROGRAMS = ss
 
 ss_SOURCES  = ss.c
-ss_SOURCES += util.h util.c andl.c
+ss_SOURCES += util.h util.c andl.c CTL.c
 ss_SOURCES += andl-lexer.l andl-parser.y
 
 ss_YFLAGS = -d
