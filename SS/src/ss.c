@@ -94,9 +94,9 @@ deinit_sylvan()
  * statistics of the parsed Petri net.
  */
 
-void visualize_bdd(BDD bdd) {
+void visualize_bdd(BDD bdd, int i) {
     char b[256];
-    snprintf(b, 256, "./BDD.dot");
+    snprintf(b, 256, "./BDD%i.dot", i);
     FILE *f = fopen(b, "w+");
     mtbdd_fprintdot(f, bdd);
     fclose(f);
@@ -131,28 +131,27 @@ BDD create_prime_var(Node* cur, int places){
     return var;
 }
 
-BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, int current_index, int len_tran){
+BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, int len_tran){
     LACE_ME;
 
-    //rename current (map has to max from no prime to prime)
-    sylvan_compose(current, map_p[current_index]);
-
     // E x'     (set has to be of type prime)
-    BDD next_states = sylvan_true;
+    BDD prev_states = sylvan_false;
+    sylvan_protect(&prev_states);
+
     for (int i = 0; i < len_tran; i++) {
-        BDD r = sylvan_exists(tran[i], set_p[current_index]);
-        next_states = sylvan_or(next_states, r);
-        sylvan_relprev(tran[i], set_p[current_index], map_p[current_index]);
+        //rename current (map has to max from no prime to prime)
+        BDD prev = sylvan_compose(current, map_p[i]);
+        prev = sylvan_and(prev, tran[i]);
+        prev = sylvan_exists(prev, set_p[i]);
+        prev_states = sylvan_or(prev_states, prev);
     }
-
-
-    return next_states;
+    return prev_states;
 }
 
 void check_formulas(BDD* tran, BDD* set, BDD* set_p, BDD* map, BDD* map_p, BDD initState, int len_tran) {
 
-    BDD test = prev(tran, set_p, map_p, initState, 0, len_tran);
-    visualize_bdd(test);
+    BDD test = prev(tran, set_p, map_p, initState, len_tran);
+    visualize_bdd(test,0);
 }
 
 void
@@ -224,7 +223,7 @@ do_ss_things(andl_context_t *andl_context)
 
             //create the condition for the map.
             map = sylvan_map_add(map, node->numPlace * 2 + 1, sylvan_ithvar(node->numPlace * 2));
-            map_p = sylvan_map_add(map_p, sylvan_ithvar(node->numPlace * 2), node->numPlace * 2 + 1);
+            map_p = sylvan_map_add(map_p, node->numPlace * 2 , sylvan_ithvar(node->numPlace * 2 + 1));
 
             if(debug) warn("cnode %d of %d (%s done)", node->numPlace, andl_context->num_places, c_cursor->name);
 
