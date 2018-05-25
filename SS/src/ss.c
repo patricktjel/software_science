@@ -14,7 +14,7 @@
 #include <stdbool.h>
 
 
-bool debug = true;
+bool debug = false;
 
 /**
  * Load the andl file in \p name.
@@ -457,15 +457,38 @@ Tree_node* check_formula(Tree_node* formula) {
             tree = add_Tree_node(tree, "G");
             tree = add_Tree_node(tree, "!");
             tree->left = formula->left->left;
-//       replace AR
+//       replace AU
         } else if (strcmp(symbol, "U") == 0) {
+            Tree_node* phi = formula->left->left;
+            Tree_node* psi = formula->left->right;
+
             start = add_Tree_node(NULL, "!");
-            Tree_node* tree = add_Tree_node(start, "E");
-            tree = add_Tree_node(tree, "R");
-            add_Tree_node(tree, "!");
-            add_Tree_node(tree, "!");
-            tree->left->left = formula->left->left;
-            tree->right->left = formula->left->right;
+            Tree_node* tree = add_Tree_node(start, "||");
+            Tree_node* left = add_Tree_node(tree, "E");
+            Tree_node* right = add_Tree_node(tree, "E");
+
+            //first right part
+            tree = add_Tree_node(right, "G");
+            tree = add_Tree_node(tree, "!");
+            tree->left = psi;
+
+            //first left part
+            tree = add_Tree_node(left, "U");
+            left = add_Tree_node(tree, "!");
+            right = add_Tree_node(tree, "&&");
+
+            //second left part
+            left->left = psi;
+
+            //second right part
+            left = add_Tree_node(right, "!");
+            right = add_Tree_node(right, "!");
+
+            //third left part
+            left->left = phi;
+
+            //third right part
+            right->left = psi;
         }
     }
     return start;
@@ -497,6 +520,8 @@ int main(int argc, char** argv)
                         formula[i] = result;
                     }
                 }
+
+                print_Tree_node(formula[7],0);
 
                 if (res) warn("Unable to load xml '%s'", formulas);
             }

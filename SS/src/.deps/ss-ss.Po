@@ -88,7 +88,8 @@ ss-ss.o: ss.c /usr/include/stdc-predef.h config.h /usr/include/stdio.h \
  /usr/include/libxml2/libxml/globals.h /usr/include/libxml2/libxml/SAX.h \
  /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
  /usr/include/libxml2/libxml/xmlmemory.h \
- /usr/include/libxml2/libxml/threads.h
+ /usr/include/libxml2/libxml/threads.h \
+ /usr/lib/gcc/x86_64-linux-gnu/5/include/stdbool.h
 
 /usr/include/stdc-predef.h:
 
@@ -341,3 +342,5 @@ util.h:
 /usr/include/libxml2/libxml/xmlmemory.h:
 
 /usr/include/libxml2/libxml/threads.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/5/include/stdbool.h:
