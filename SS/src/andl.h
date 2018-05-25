@@ -46,6 +46,7 @@ struct cnode {
 typedef struct tnode TNode;
 struct tnode {
     char* name;
+    int number;
     CNode* conditions;
     TNode* next;
 };
@@ -53,6 +54,8 @@ struct tnode {
 TNode* createTNode(char* name);
 
 TNode* addTNode(TNode* head, TNode* add);
+
+TNode* search_function(TNode* head, char* function_name);
 
 TNode* addCNode(TNode* node, char* name, int op);
 

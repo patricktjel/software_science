@@ -46,13 +46,26 @@ TNode* createTNode(char* name) {
     node->name = name;
     node->conditions = NULL;
     node->next = NULL;
+    node->number = 0;
 
     return node;
 }
 
 TNode* addTNode(TNode* head, TNode* add) {
     add->next = head;
+    add->number =  (head != NULL) ? head->number + 1 : 0;
     return  add;
+}
+
+TNode* search_function(TNode* head, char* function_name) {
+    TNode* cursor = head;
+    while(cursor!=NULL)
+    {
+        if(strcmp(cursor->name,function_name) == 0)
+            return cursor;
+        cursor = cursor->next;
+    }
+    return NULL;
 }
 
 TNode* addCNode(TNode* tnode, char* name, int op) {

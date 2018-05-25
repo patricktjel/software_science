@@ -131,7 +131,7 @@ BDD create_prime_var(Node* cur, int places){
     return var;
 }
 
-BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, int len_tran){
+BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, int len_tran, int* allowed_tran){
     LACE_ME;
 
     // E x'     (set has to be of type prime)
@@ -139,19 +139,49 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, int len_tran){
     sylvan_protect(&prev_states);
 
     for (int i = 0; i < len_tran; i++) {
+        int j = allowed_tran[i];
         //rename current (map has to max from no prime to prime)
-        BDD prev = sylvan_compose(current, map_p[i]);
-        prev = sylvan_and(prev, tran[i]);
-        prev = sylvan_exists(prev, set_p[i]);
+        BDD prev = sylvan_compose(current, map_p[j]);
+        prev = sylvan_and(prev, tran[j]);
+        prev = sylvan_exists(prev, set_p[j]);
         prev_states = sylvan_or(prev_states, prev);
     }
     return prev_states;
 }
 
-void check_formulas(BDD* tran, BDD* set, BDD* set_p, BDD* map, BDD* map_p, BDD initState, int len_tran) {
+BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, int len_tran, int* allowed_tran){
+    LACE_ME;
 
-    BDD test = prev(tran, set_p, map_p, initState, len_tran);
-    visualize_bdd(test,0);
+    BDD z = sylvan_true;
+    BDD old = sylvan_false;
+    int i = 0;
+
+    while (z != old) {
+        old = z;
+        z = sylvan_and(z, prev(tran, set_p, map_p, z, len_tran, allowed_tran));
+        visualize_bdd(z, i++);
+    }
+}
+
+void check_formulas(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
+
+    // get allowed transitions
+    L_node* data = formula[0]->left->left->left->left->data;
+    int len = length(data);
+    int allowed_tran[len];
+
+    for (int i = 0; data != NULL; i++) {
+        int number = search_function(andl_context->tHead, data->symbol)->number;
+        allowed_tran[i] = andl_context->num_transitions - number - 1;
+        data = data->next;
+    }
+
+    BDD result = gfp(tran, set_p, map_p, len, allowed_tran);
+    if (result == sylvan_false) {
+        warn("FALSE");
+    } else {
+        warn("TRUE");
+    }
 }
 
 void
@@ -283,7 +313,7 @@ do_ss_things(andl_context_t *andl_context)
     warn("nodecount of: %lu", sylvan_nodecount(cur));
 
 //    visualize_bdd(cur);
-    check_formulas(transitions, transitions_set, transitions_set_p, transitions_map, transitions_map_p, initState, andl_context->num_transitions);
+    check_formulas(transitions, transitions_set_p, transitions_map_p, andl_context);
 
     sylvan_unprotect(&cur);
     sylvan_unprotect(&vis);

@@ -11,6 +11,8 @@ L_node* create_L_node(char* symbol);
 
 L_node* add_L_node(L_node* first, char* toAdd);
 
+int length(L_node* first);
+
 void print_L_node(L_node* node);
 
 typedef struct tree_node Tree_node;

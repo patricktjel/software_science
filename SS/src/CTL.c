@@ -17,6 +17,15 @@ L_node* add_L_node(L_node* first, char* symbol) {
     return node;
 }
 
+int length(L_node* first) {
+    int length = 0;
+    while (first != NULL) {
+        length = length + 1;
+        first = first->next;
+    }
+    return length;
+}
+
 Tree_node* create_Tree_node(L_node *data) {
     Tree_node* node = malloc(sizeof(Tree_node));
     node->data = data;
