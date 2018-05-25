@@ -12,6 +12,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <stdbool.h>
+#include "andl.h"
 
 
 bool debug = false;
@@ -105,11 +106,13 @@ void visualize_bdd(BDD bdd) {
 BDD create_var(Node* cur){
     LACE_ME;
 
+    int name = cur->numPlace * 2;
+
     BDD var;
     if (cur->token == 1) {
-        var = sylvan_ithvar(cur->numPlace);
+        var = sylvan_ithvar(name);
     } else {
-        var = sylvan_nithvar(cur->numPlace);
+        var = sylvan_nithvar(name);
     }
     return var;
 }
@@ -117,7 +120,7 @@ BDD create_var(Node* cur){
 BDD create_prime_var(Node* cur, int places){
     LACE_ME;
 
-    int name = cur->numPlace + places;
+    int name = cur->numPlace * 2 + 1;
 
     BDD var;
     if (cur->token == 1) {
@@ -126,6 +129,30 @@ BDD create_prime_var(Node* cur, int places){
         var = sylvan_ithvar(name);
     }
     return var;
+}
+
+BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, int current_index, int len_tran){
+    LACE_ME;
+
+    //rename current (map has to max from no prime to prime)
+    sylvan_compose(current, map_p[current_index]);
+
+    // E x'     (set has to be of type prime)
+    BDD next_states = sylvan_true;
+    for (int i = 0; i < len_tran; i++) {
+        BDD r = sylvan_exists(tran[i], set_p[current_index]);
+        next_states = sylvan_or(next_states, r);
+        sylvan_relprev(tran[i], set_p[current_index], map_p[current_index]);
+    }
+
+
+    return next_states;
+}
+
+void check_formulas(BDD* tran, BDD* set, BDD* set_p, BDD* map, BDD* map_p, BDD initState, int len_tran) {
+
+    BDD test = prev(tran, set_p, map_p, initState, 0, len_tran);
+    visualize_bdd(test);
 }
 
 void
@@ -151,7 +178,9 @@ do_ss_things(andl_context_t *andl_context)
 
     BDD transitions[andl_context->num_transitions];
     BDD transitions_set[andl_context->num_transitions];
+    BDD transitions_set_p[andl_context->num_transitions];
     BDD transitions_map[andl_context->num_transitions];
+    BDD transitions_map_p[andl_context->num_transitions];
 
     TNode* t_cursor = andl_context->tHead;
 
@@ -163,8 +192,12 @@ do_ss_things(andl_context_t *andl_context)
         sylvan_protect(&tran);
         BDD set = sylvan_set_empty();
         sylvan_protect(&set);
+        BDD set_p = sylvan_set_empty();
+        sylvan_protect(&set_p);
         BDDMAP map = sylvan_map_empty();
         sylvan_protect(&map);
+        BDDMAP map_p = sylvan_map_empty();
+        sylvan_protect(&map_p);
 
         while (c_cursor != NULL) {
 
@@ -186,10 +219,12 @@ do_ss_things(andl_context_t *andl_context)
             tran = sylvan_and(tran, condition);
 
             //create the condition for the set.
-            set = sylvan_set_add(set, node->numPlace);
+            set = sylvan_set_add(set, node->numPlace * 2);
+            set_p = sylvan_set_add(set_p, node->numPlace * 2 + 1);
 
             //create the condition for the map.
-            map = sylvan_map_add(map, node->numPlace + andl_context->num_places, sylvan_ithvar(node->numPlace));
+            map = sylvan_map_add(map, node->numPlace * 2 + 1, sylvan_ithvar(node->numPlace * 2));
+            map_p = sylvan_map_add(map_p, sylvan_ithvar(node->numPlace * 2), node->numPlace * 2 + 1);
 
             if(debug) warn("cnode %d of %d (%s done)", node->numPlace, andl_context->num_places, c_cursor->name);
 
@@ -201,7 +236,9 @@ do_ss_things(andl_context_t *andl_context)
 
         transitions[i] = tran;
         transitions_set[i] = set;
+        transitions_set_p[i] = set_p;
         transitions_map[i] = map;
+        transitions_map_p[i] = map_p;
 
         if(debug) warn("%d of %d (%s DONE)", i+1, andl_context->num_transitions, t_cursor->name);
 
@@ -236,7 +273,7 @@ do_ss_things(andl_context_t *andl_context)
     sylvan_protect(&result);
     cursor = andl_context->head;
     while (cursor != NULL) {
-        result = sylvan_set_add(result, cursor->numPlace);
+        result = sylvan_set_add(result, cursor->numPlace * 2);
         cursor = cursor->next;
     }
 
@@ -246,7 +283,9 @@ do_ss_things(andl_context_t *andl_context)
     warn("satcount of: %lf", sylvan_satcount(cur, result));
     warn("nodecount of: %lu", sylvan_nodecount(cur));
 
-    visualize_bdd(cur);
+//    visualize_bdd(cur);
+    check_formulas(transitions, transitions_set, transitions_set_p, transitions_map, transitions_map_p, initState, andl_context->num_transitions);
+
     sylvan_unprotect(&cur);
     sylvan_unprotect(&vis);
     sylvan_unprotect(&result);
@@ -521,7 +560,7 @@ int main(int argc, char** argv)
                     }
                 }
 
-                print_Tree_node(formula[7],0);
+//                print_Tree_node(formula[10],0);
 
                 if (res) warn("Unable to load xml '%s'", formulas);
             }
