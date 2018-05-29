@@ -67,10 +67,11 @@ init_sylvan()
 
     /* initialize the node table and cache with minimum size 2^20 entries, and
      * maximum 2^25 entries */
-    sylvan_init_package(1LL<<20,1LL<<25,1LL<<20,1LL<<25);
+    sylvan_init_package(1LL<<22,1LL<<25,1LL<<22,1LL<<25);
 
     // initialize Sylvan's BDD sub system
     sylvan_init_bdd();
+    sylvan_gc_disable();
 }
 
 /**
@@ -149,7 +150,6 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_co
 
     // E x'     (set has to be of type prime)
     BDD prev_states = sylvan_false;
-    sylvan_protect(&current);
     sylvan_protect(&prev_states);
 
     // check previous states for all allowed transitions
@@ -163,7 +163,6 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_co
         sylvan_unprotect(&prev);
     }
     sylvan_unprotect(&prev_states);
-    sylvan_unprotect(&current);
     return prev_states;
 }
 
@@ -234,7 +233,11 @@ do_ss_things(andl_context_t *andl_context)
     BDD transitions_set_p[andl_context->num_transitions];
     BDD transitions_map[andl_context->num_transitions];
     BDD transitions_map_p[andl_context->num_transitions];
-
+    sylvan_protect(transitions);
+    sylvan_protect(transitions_set);
+    sylvan_protect(transitions_set_p);
+    sylvan_protect(transitions_map);
+    sylvan_protect(transitions_map_p);
     TNode* t_cursor = andl_context->tHead;
 
     for (int i = 0; i < andl_context->num_transitions; i++) {
