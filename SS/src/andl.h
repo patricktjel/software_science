@@ -89,13 +89,33 @@ TNode* createTNode(char* name);
  */
 TNode* addTNode(TNode* head, TNode* add);
 
-
+/**
+ * Searches for a function withing the transitions
+ * @param head the head where to start searching
+ * @param function_name the name of the function too look for
+ * @return TNode containing the function or NULL if not found
+ */
 TNode* search_function(TNode* head, char* function_name);
 
+/**
+ * Adds a condition node to a certain transition
+ * @param node tnode to add the transition to
+ * @param name the name of the condition
+ * @param op the operation (e.g. 1 or 0)
+ * @return the tnode where the condition was added
+ */
 TNode* addCNode(TNode* node, char* name, int op);
 
+/**
+ * prints the list of all tnodes with its cnodes
+ * @param node
+ */
 void printTNode(TNode* node);
 
+/**
+ * prints all cnodes starting from the given cnode
+ * @param node the cnode to start from
+ */
 void printCNode(CNode* node);
 
 /**

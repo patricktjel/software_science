@@ -8,6 +8,11 @@
 #include <string.h>
 #include <stdio.h>
 
+/**
+ * Implementation of the methods in andl.h
+ * See andl.h for further details
+ */
+
 Node* new_node(char* name, int token, int numPlace) {
     Node* node = malloc(sizeof(Node));
     node->name = name;

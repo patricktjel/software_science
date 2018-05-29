@@ -71,7 +71,7 @@ init_sylvan()
 
     // initialize Sylvan's BDD sub system
     sylvan_init_bdd();
-    sylvan_gc_disable();
+    //sylvan_gc_disable();
 }
 
 /**
@@ -163,9 +163,9 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_co
         prev = sylvan_exists(prev, set_p[i]);
 //        visualize_bdd(prev, 2);
         prev_states = sylvan_or(prev_states, prev);
-        sylvan_unprotect(&prev);
+        //sylvan_unprotect(&prev);
     }
-    sylvan_unprotect(&prev_states);
+    //sylvan_unprotect(&prev_states);
     return prev_states;
 }
 
@@ -185,7 +185,6 @@ BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD cur
 //        visualize_bdd(z, i++);
     }
     sylvan_unprotect(&old);
-    sylvan_unprotect(&z);
     return z;
 }
 
@@ -289,6 +288,7 @@ do_ss_things(andl_context_t *andl_context)
     sylvan_protect(transitions_set_p);
     sylvan_protect(transitions_map);
     sylvan_protect(transitions_map_p);
+
     TNode* t_cursor = andl_context->tHead;
 
     for (int i = 0; i < andl_context->num_transitions; i++) {
