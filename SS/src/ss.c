@@ -67,7 +67,7 @@ init_sylvan()
 
     /* initialize the node table and cache with minimum size 2^20 entries, and
      * maximum 2^25 entries */
-    sylvan_init_package(1LL<<22,1LL<<25,1LL<<22,1LL<<25);
+    sylvan_init_package(1LL<<26,1LL<<26,1LL<<26,1LL<<26);
 
     // initialize Sylvan's BDD sub system
     sylvan_init_bdd();
@@ -189,40 +189,67 @@ BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD cur
     return z;
 }
 
+BDD lfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD a, BDD b) {
+    LACE_ME;
+
+    BDD z = b;
+    BDD old = sylvan_true;
+
+    while (z != old) {
+        old = z;
+        z = sylvan_or(z, (sylvan_and(a, prev(tran, set_p, map_p, z, andl_context))));
+    }
+    return z;
+}
+
 BDD check_formula_CTL(Tree_node* formula, BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
     LACE_ME;
     char* symbol = formula->data->symbol;
-    if (symbol == "!") {
+    if (strcmp(symbol,"!") == 0) {
 //        warn("negation");
         return sylvan_not(check_formula_CTL(formula->left, tran, set_p, map_p, andl_context));
-    } else if (symbol == "E") {
+    } else if (strcmp(symbol,"E") == 0) {
 //        warn("E");
         return check_formula_CTL(formula->left, tran, set_p, map_p, andl_context);
-    } else if (symbol == "G") {
+    } else if (strcmp(symbol,"G") == 0) {
 //        warn("G");
         return gfp(tran, set_p, map_p, andl_context, check_formula_CTL(formula->left, tran, set_p, map_p, andl_context));
-    } else if (symbol == "||") {
+    } else if (strcmp(symbol,"||") == 0) {
 //        warn("or");
         return sylvan_or(check_formula_CTL(formula->left, tran, set_p, map_p, andl_context),
                         check_formula_CTL(formula->right, tran, set_p, map_p, andl_context));
-    } else if (symbol == "&&") {
+    } else if (strcmp(symbol,"&&") == 0) {
 //        warn("and");
         return sylvan_and(check_formula_CTL(formula->left, tran, set_p, map_p, andl_context),
                          check_formula_CTL(formula->right, tran, set_p, map_p, andl_context));
-    } else if (symbol == "U") {
+    } else if (strcmp(symbol,"U") == 0) {
+//        warn("U");
+        return lfp(tran, set_p, map_p, andl_context,
+                   check_formula_CTL(formula->left, tran, set_p, map_p, andl_context),
+                   check_formula_CTL(formula->right, tran, set_p, map_p, andl_context));
+    } else if (strcmp(symbol,"X") == 0) {
+//        warn("X");
+        return prev(tran, set_p, map_p, check_formula_CTL(formula->left, tran, set_p, map_p, andl_context), andl_context);
+    } else if (strcmp(symbol, "1") == 0){
         return sylvan_true;
-    } else if (symbol == "X") {
-        return sylvan_true;
+    } else if (strcmp(symbol, "0") == 0){
+        return sylvan_false;
     } else { // default case only transitions are left
 //        warn("tran");
         return check_tran(formula->data, andl_context, tran);
     }
 }
 
-void check_formulas(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
+void check_formulas(BDD* tran, BDD* set_p, BDD* map_p, const BDD init, andl_context_t* andl_context) {
+    LACE_ME;
     for (int i = 0; i < 16; i++) {
+//    int i = 3;
         BDD result = check_formula_CTL(formula[i], tran, set_p, map_p, andl_context);
-//        visualize_bdd(result, 0);
+
+        visualize_bdd(result, 0);
+        visualize_bdd(init, 1);
+        result = sylvan_and(result, init);
+        visualize_bdd(result, 2);
         if (result == sylvan_false) {
             warn("%d is FALSE", i);
         } else {
@@ -329,46 +356,46 @@ do_ss_things(andl_context_t *andl_context)
     if(debug) warn("Done building transition BDDS");
 
     //    while
-    BDD cur = initState;
-    sylvan_protect(&cur);
-    BDD vis = cur;
-    sylvan_protect(&vis);
-
-    do {
-        vis = cur;
-        for (int i = 0; i < andl_context->num_transitions; i = i + 1) {
-            BDD r = sylvan_and(cur, transitions[i]);
-
-            r = sylvan_exists(r, transitions_set[i]);
-            r = sylvan_compose(r, transitions_map[i]);
-
-            cur = sylvan_or(cur, r);
-        }
-    } while (cur != vis);
-
-    if (debug) warn("Done building state space");
-
-    //create result set
-    BDD result = sylvan_set_empty();
-    sylvan_protect(&result);
-    cursor = andl_context->head;
-    while (cursor != NULL) {
-        result = sylvan_set_add(result, cursor->numPlace * 2);
-        cursor = cursor->next;
-    }
-
-    if (debug) warn("Done result set for satcount");
-
-    //print result
-    warn("satcount of: %lf", sylvan_satcount(cur, result));
-    warn("nodecount of: %lu", sylvan_nodecount(cur));
+//    BDD cur = initState;
+//    sylvan_protect(&cur);
+//    BDD vis = cur;
+//    sylvan_protect(&vis);
+//
+//    do {
+//        vis = cur;
+//        for (int i = 0; i < andl_context->num_transitions; i = i + 1) {
+//            BDD r = sylvan_and(cur, transitions[i]);
+//
+//            r = sylvan_exists(r, transitions_set[i]);
+//            r = sylvan_compose(r, transitions_map[i]);
+//
+//            cur = sylvan_or(cur, r);
+//        }
+//    } while (cur != vis);
+//
+//    if (debug) warn("Done building state space");
+//
+//    //create result set
+//    BDD result = sylvan_set_empty();
+//    sylvan_protect(&result);
+//    cursor = andl_context->head;
+//    while (cursor != NULL) {
+//        result = sylvan_set_add(result, cursor->numPlace * 2);
+//        cursor = cursor->next;
+//    }
+//
+//    if (debug) warn("Done result set for satcount");
+//
+//    //print result
+//    warn("satcount of: %lf", sylvan_satcount(cur, result));
+//    warn("nodecount of: %lu", sylvan_nodecount(cur));
 
 //    visualize_bdd(cur);
-    check_formulas(transitions, transitions_set_p, transitions_map_p, andl_context);
+    check_formulas(transitions, transitions_set_p, transitions_map_p, initState, andl_context);
 
-    sylvan_unprotect(&cur);
-    sylvan_unprotect(&vis);
-    sylvan_unprotect(&result);
+//    sylvan_unprotect(&cur);
+//    sylvan_unprotect(&vis);
+//    sylvan_unprotect(&result);
 }
 
 /**
