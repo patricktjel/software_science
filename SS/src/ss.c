@@ -156,9 +156,12 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_co
     for (int i = 0; i < andl_context->num_transitions; i++) {
         //rename current (map has to max from no prime to prime)
         BDD prev = sylvan_compose(current, map_p[i]);
+//        visualize_bdd(prev, 0);
         sylvan_protect(&prev);
         prev = sylvan_and(prev, tran[i]);
+//        visualize_bdd(prev, 1);
         prev = sylvan_exists(prev, set_p[i]);
+//        visualize_bdd(prev, 2);
         prev_states = sylvan_or(prev_states, prev);
         sylvan_unprotect(&prev);
     }
@@ -166,10 +169,11 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_co
     return prev_states;
 }
 
-BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD z){
+BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD cur){
     LACE_ME;
 
     BDD old = sylvan_false;
+    BDD z = cur;
 
     sylvan_protect(&z);
     sylvan_protect(&old);
@@ -178,7 +182,7 @@ BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD z){
     while (z != old) {
         old = z;
         z = sylvan_and(z, prev(tran, set_p, map_p, z, andl_context));
-        visualize_bdd(z, i++);
+//        visualize_bdd(z, i++);
     }
     sylvan_unprotect(&old);
     sylvan_unprotect(&z);
@@ -186,24 +190,44 @@ BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD z){
 }
 
 BDD check_formula_CTL(Tree_node* formula, BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
+    LACE_ME;
     char* symbol = formula->data->symbol;
     if (symbol == "!") {
+//        warn("negation");
         return sylvan_not(check_formula_CTL(formula->left, tran, set_p, map_p, andl_context));
     } else if (symbol == "E") {
+//        warn("E");
         return check_formula_CTL(formula->left, tran, set_p, map_p, andl_context);
     } else if (symbol == "G") {
+//        warn("G");
         return gfp(tran, set_p, map_p, andl_context, check_formula_CTL(formula->left, tran, set_p, map_p, andl_context));
+    } else if (symbol == "||") {
+//        warn("or");
+        return sylvan_or(check_formula_CTL(formula->left, tran, set_p, map_p, andl_context),
+                        check_formula_CTL(formula->right, tran, set_p, map_p, andl_context));
+    } else if (symbol == "&&") {
+//        warn("and");
+        return sylvan_and(check_formula_CTL(formula->left, tran, set_p, map_p, andl_context),
+                         check_formula_CTL(formula->right, tran, set_p, map_p, andl_context));
+    } else if (symbol == "U") {
+        return sylvan_true;
+    } else if (symbol == "X") {
+        return sylvan_true;
     } else { // default case only transitions are left
+//        warn("tran");
         return check_tran(formula->data, andl_context, tran);
     }
 }
 
 void check_formulas(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
-    BDD result = check_formula_CTL(formula[0], tran, set_p, map_p, andl_context);
-    if (result == sylvan_false) {
-        warn("FALSE");
-    } else {
-        warn("TRUE");
+    for (int i = 0; i < 16; i++) {
+        BDD result = check_formula_CTL(formula[i], tran, set_p, map_p, andl_context);
+//        visualize_bdd(result, 0);
+        if (result == sylvan_false) {
+            warn("%d is FALSE", i);
+        } else {
+            warn("%d is TRUE", i);
+        }
     }
 }
 
