@@ -117,7 +117,7 @@ BDD create_var(Node* cur){
     return var;
 }
 
-BDD create_prime_var(Node* cur, int places){
+BDD create_prime_var(Node* cur){
     LACE_ME;
 
     int name = cur->numPlace * 2 + 1;
@@ -282,7 +282,7 @@ do_ss_things(andl_context_t *andl_context)
 
             BDD var = create_var(node);
             sylvan_protect(&var);
-            BDD prime = create_prime_var(node, andl_context->num_places);
+            BDD prime = create_prime_var(node);
             sylvan_protect(&prime);
 
             BDD condition = sylvan_and(var, prime);

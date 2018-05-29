@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/**
+ * Implementation of the methods in CTL.h
+ * See CTL.h for further documentation
+ */
 
 L_node* create_L_node(char* symbol) {
     L_node* node = malloc(sizeof(L_node));
@@ -65,7 +69,6 @@ Tree_node* add_Tree_data(Tree_node* parent, L_node* data) {
 
     return node;
 }
-
 
 void print_Tree_node(Tree_node* node, int depth) {
     if (node == NULL) {
