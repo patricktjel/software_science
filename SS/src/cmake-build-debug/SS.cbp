@@ -8,116 +8,116 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+				<Option working_dir="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+				<Option working_dir="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+				<Option working_dir="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="SS">
-				<Option output="/home/lars/git/software_science/SS/src/cmake-build-debug/SS" prefix_auto="0" extension_auto="0"/>
+				<Option output="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/SS" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir=""/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/lars/git/software_science/SS/src/."/>
+					<Add directory="/home/patrick/CLionProjects/software_science/SS/src/."/>
 					<Add directory="/usr/include/libxml2"/>
-					<Add directory="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
-					<Add directory="/usr/include/c++/7"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
-					<Add directory="/usr/include/c++/7/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug"/>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
 					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
 					<Add directory="/usr/include/x86_64-linux-gnu"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 SS"/>
-					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 SS"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="SS/fast">
-				<Option output="/home/lars/git/software_science/SS/src/cmake-build-debug/SS" prefix_auto="0" extension_auto="0"/>
+				<Option output="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/SS" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir=""/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/lars/git/software_science/SS/src/."/>
+					<Add directory="/home/patrick/CLionProjects/software_science/SS/src/."/>
 					<Add directory="/usr/include/libxml2"/>
-					<Add directory="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
-					<Add directory="/usr/include/c++/7"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
-					<Add directory="/usr/include/c++/7/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug"/>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
 					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
 					<Add directory="/usr/include/x86_64-linux-gnu"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 SS/fast"/>
-					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 SS/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/lars/git/software_science/SS/src/andl.h">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/andl.h">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-lexer.c">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/andl-lexer.c">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-lexer.c.rule">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/andl-lexer.c.rule">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-parser.c">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/andl-parser.c">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-parser.c.rule">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/andl-parser.c.rule">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-parser.h">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/cmake-build-debug/andl-parser.h">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/config.h">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/config.h">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/ss.c">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/ss.c">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/util.c">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/util.c">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/util.h">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/util.h">
 			<Option target="SS"/>
 		</Unit>
 		<Unit filename="/usr/include/FlexLexer.h">
@@ -264,7 +264,7 @@
 		<Unit filename="/usr/include/libxml2/libxml/xpointer.h">
 			<Option target="SS"/>
 		</Unit>
-		<Unit filename="/home/lars/git/software_science/SS/src/CMakeLists.txt">
+		<Unit filename="/home/patrick/CLionProjects/software_science/SS/src/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

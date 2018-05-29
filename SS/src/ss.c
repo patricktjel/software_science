@@ -131,93 +131,76 @@ BDD create_prime_var(Node* cur){
     return var;
 }
 
-void check_tran(L_node* data, int len, bool isNegation, andl_context_t* andl_context, int* allowed_tran, int* allowed_tran_neg) {
+BDD check_tran(L_node* data, andl_context_t* andl_context, BDD* tran) {
+    LACE_ME;
     // fill the array with all transition indexes according to the data field
+    BDD result = sylvan_false;
     for (int i = 0; data != NULL; i++) {
         int number = search_function(andl_context->tHead, data->symbol)->number;
-        allowed_tran[i] = andl_context->num_transitions - number - 1;
+        int index = andl_context->num_transitions - number - 1;
+        result = sylvan_or(result, tran[index]);
         data = data->next;
     }
-
-    // if there is a negation all transitions are allowed except the ones in the data field.
-    if (isNegation) {
-
-        int j = 0; // index of allowed_tran_neg
-
-        TNode* cursor = andl_context->tHead;
-        while (cursor != NULL) {
-            int number = andl_context->num_transitions - cursor->number - 1;
-
-            bool foundNumber = false;
-            for (int i = 0; i < len; i++) {
-                if (allowed_tran[i] == number) {
-                    foundNumber = true;
-                    break;
-                }
-            }
-
-            if(!foundNumber) {
-                allowed_tran_neg[j] = number;
-                j++;
-            }
-
-            cursor = cursor->next;
-        }
-    }
+    return result;
 }
 
-BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, int len_tran, const int* allowed_tran){
+BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_context){
     LACE_ME;
 
     // E x'     (set has to be of type prime)
     BDD prev_states = sylvan_false;
+    sylvan_protect(&current);
     sylvan_protect(&prev_states);
 
     // check previous states for all allowed transitions
-    for (int i = 0; i < len_tran; i++) {
-        int j = allowed_tran[i];
+    for (int i = 0; i < andl_context->num_transitions; i++) {
         //rename current (map has to max from no prime to prime)
-        BDD prev = sylvan_compose(current, map_p[j]);
-        prev = sylvan_and(prev, tran[j]);
-        prev = sylvan_exists(prev, set_p[j]);
+        BDD prev = sylvan_compose(current, map_p[i]);
+        sylvan_protect(&prev);
+        prev = sylvan_and(prev, tran[i]);
+        prev = sylvan_exists(prev, set_p[i]);
         prev_states = sylvan_or(prev_states, prev);
+        sylvan_unprotect(&prev);
     }
+    sylvan_unprotect(&prev_states);
+    sylvan_unprotect(&current);
     return prev_states;
 }
 
-BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, int len_tran, int* allowed_tran){
+BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD z){
     LACE_ME;
 
-    BDD z = sylvan_true;
     BDD old = sylvan_false;
+
+    sylvan_protect(&z);
+    sylvan_protect(&old);
 
     int i = 0;
     while (z != old) {
         old = z;
-        z = sylvan_and(z, prev(tran, set_p, map_p, z, len_tran, allowed_tran));
+        z = sylvan_and(z, prev(tran, set_p, map_p, z, andl_context));
         visualize_bdd(z, i++);
+    }
+    sylvan_unprotect(&old);
+    sylvan_unprotect(&z);
+    return z;
+}
+
+BDD check_formula_CTL(Tree_node* formula, BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
+    char* symbol = formula->data->symbol;
+    if (symbol == "!") {
+        return sylvan_not(check_formula_CTL(formula->left, tran, set_p, map_p, andl_context));
+    } else if (symbol == "E") {
+        return check_formula_CTL(formula->left, tran, set_p, map_p, andl_context);
+    } else if (symbol == "G") {
+        return gfp(tran, set_p, map_p, andl_context, check_formula_CTL(formula->left, tran, set_p, map_p, andl_context));
+    } else { // default case only transitions are left
+        return check_tran(formula->data, andl_context, tran);
     }
 }
 
 void check_formulas(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
-
-    // get allowed transitions
-    L_node* data = formula[0]->left->left->left->left->data;
-
-    int len = length(data);
-    int allowed_tran[len];
-    int allowed_tran_neg[andl_context->num_transitions - len];
-    bool is_negation = true;
-    check_tran(data, len, is_negation, andl_context, allowed_tran, allowed_tran_neg);
-
-    BDD result;
-    if (is_negation){
-        result = gfp(tran, set_p, map_p, len, allowed_tran_neg);
-    } else {
-        result = gfp(tran, set_p, map_p, len, allowed_tran);
-    }
-
-    result = sylvan_not(result);
+    BDD result = check_formula_CTL(formula[0], tran, set_p, map_p, andl_context);
     if (result == sylvan_false) {
         warn("FALSE");
     } else {
