@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="SS"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SS">
+				<Option output="/home/lars/git/software_science/SS/src/cmake-build-debug/SS" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir=""/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lars/git/software_science/SS/src/."/>
+					<Add directory="/usr/include/libxml2"/>
+					<Add directory="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 SS"/>
+					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SS/fast">
+				<Option output="/home/lars/git/software_science/SS/src/cmake-build-debug/SS" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir=""/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lars/git/software_science/SS/src/."/>
+					<Add directory="/usr/include/libxml2"/>
+					<Add directory="/home/lars/git/software_science/SS/src/cmake-build-debug"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 SS/fast"/>
+					<CompileFile command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j3 -f &quot;/home/lars/git/software_science/SS/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/lars/git/software_science/SS/src/andl.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-lexer.c">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-lexer.c.rule">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-parser.c">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-parser.c.rule">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/cmake-build-debug/andl-parser.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/config.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/ss.c">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/util.c">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/util.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/FlexLexer.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/DOCBparser.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/HTMLparser.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/HTMLtree.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/SAX.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/SAX2.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/c14n.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/catalog.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/chvalid.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/debugXML.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/dict.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/encoding.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/entities.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/globals.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/hash.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/list.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/nanoftp.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/nanohttp.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/parser.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/parserInternals.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/pattern.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/relaxng.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/schemasInternals.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/schematron.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/threads.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/tree.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/uri.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/valid.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xinclude.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xlink.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlIO.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlautomata.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlerror.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlexports.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlmemory.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlmodule.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlreader.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlregexp.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlsave.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlschemas.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlschemastypes.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlstring.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlunicode.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlversion.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xmlwriter.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xpath.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xpathInternals.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/usr/include/libxml2/libxml/xpointer.h">
+			<Option target="SS"/>
+		</Unit>
+		<Unit filename="/home/lars/git/software_science/SS/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
