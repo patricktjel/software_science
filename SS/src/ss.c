@@ -583,7 +583,7 @@ load_xml(const char* name)
 }
 
 /**
- * This changes a formulat to a standard normal form (E.G.
+ * This changes a formula to a standard normal form (E.G.
  *  a form using only EX, EG and EU fragments
  */
 Tree_node* check_formula(Tree_node* formula) {
