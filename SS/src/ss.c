@@ -67,11 +67,11 @@ init_sylvan()
 
     /* initialize the node table and cache with minimum size 2^20 entries, and
      * maximum 2^25 entries */
-    sylvan_init_package(1LL<<26,1LL<<26,1LL<<26,1LL<<26);
+    sylvan_init_package(1LL<<27,1LL<<27,1LL<<27,1LL<<27);
 
     // initialize Sylvan's BDD sub system
     sylvan_init_bdd();
-    //sylvan_gc_disable();
+    sylvan_gc_disable();
 }
 
 /**
@@ -103,7 +103,7 @@ void visualize_bdd(BDD bdd, int i) {
     fclose(f);
 }
 
-// creates an ithvar OR and nithvar.
+// creates an ithvar OR and nithvar for the hiven node.
 BDD create_var(Node* cur){
     LACE_ME;
 
@@ -118,6 +118,7 @@ BDD create_var(Node* cur){
     return var;
 }
 
+//Created the primed var for a given node
 BDD create_prime_var(Node* cur){
     LACE_ME;
 
@@ -132,6 +133,9 @@ BDD create_prime_var(Node* cur){
     return var;
 }
 
+/**
+ * Creates a BDD for transitions that are allowed
+ */
 BDD check_tran(L_node* data, andl_context_t* andl_context, BDD* tran) {
     LACE_ME;
     // fill the array with all transition indexes according to the data field
@@ -145,6 +149,15 @@ BDD check_tran(L_node* data, andl_context_t* andl_context, BDD* tran) {
     return result;
 }
 
+/**
+ * calculates all previous states based on a given BDD
+ * @param tran Array with BDDs of all transitions
+ * @param set_p Array with BDD set for renaming
+ * @param map_p Array with maps for renaming
+ * @param andl_context
+ * @param current the current BDD
+ * @return BDD of all previous states
+ */
 BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_context){
     LACE_ME;
 
@@ -156,12 +169,12 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_co
     for (int i = 0; i < andl_context->num_transitions; i++) {
         //rename current (map has to max from no prime to prime)
         BDD prev = sylvan_compose(current, map_p[i]);
-//        visualize_bdd(prev, 0);
+        // visualize_bdd(prev, 0);
         sylvan_protect(&prev);
         prev = sylvan_and(prev, tran[i]);
-//        visualize_bdd(prev, 1);
+        // visualize_bdd(prev, 1);
         prev = sylvan_exists(prev, set_p[i]);
-//        visualize_bdd(prev, 2);
+        // visualize_bdd(prev, 2);
         prev_states = sylvan_or(prev_states, prev);
         //sylvan_unprotect(&prev);
     }
@@ -169,6 +182,15 @@ BDD prev(BDD* tran, BDD* set_p, BDD* map_p, BDD current, andl_context_t* andl_co
     return prev_states;
 }
 
+/**
+ * calculates the greatest fixed point
+ * @param tran Array with BDDs of all transitions
+ * @param set_p Array with BDD set for renaming
+ * @param map_p Array with maps for renaming
+ * @param andl_context
+ * @param cur the current BDD
+ * @return the greatest fixed point
+ */
 BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD cur){
     LACE_ME;
 
@@ -182,12 +204,21 @@ BDD gfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD cur
     while (z != old) {
         old = z;
         z = sylvan_and(z, prev(tran, set_p, map_p, z, andl_context));
-//        visualize_bdd(z, i++);
     }
     sylvan_unprotect(&old);
     return z;
 }
 
+/**
+ * calculates the least fixed point
+ * @param tran Array with BDDs of all transitions
+ * @param set_p Array with BDD set for renaming
+ * @param map_p Array with maps for renaming
+ * @param andl_context
+ * @param a A in the formula to calculate LFP (See slides for LFP calculation)
+ * @param b B in the formula to calculate LFP (See slides for LFP calculation)
+ * @return the greatest fixed point
+ */
 BDD lfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD a, BDD b) {
     LACE_ME;
 
@@ -201,6 +232,9 @@ BDD lfp(BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context, BDD a, 
     return z;
 }
 
+/**
+ * Checks bottom up (recursively) if the normalized CTL formula in the tree holds.
+ */
 BDD check_formula_CTL(Tree_node* formula, BDD* tran, BDD* set_p, BDD* map_p, andl_context_t* andl_context) {
     LACE_ME;
     char* symbol = formula->data->symbol;
@@ -239,16 +273,14 @@ BDD check_formula_CTL(Tree_node* formula, BDD* tran, BDD* set_p, BDD* map_p, and
     }
 }
 
+/**
+ * Checks all formulas 16 formula's in the CTLFirability.xml file
+ */
 void check_formulas(BDD* tran, BDD* set_p, BDD* map_p, const BDD init, andl_context_t* andl_context) {
     LACE_ME;
     for (int i = 0; i < 16; i++) {
-//    int i = 3;
         BDD result = check_formula_CTL(formula[i], tran, set_p, map_p, andl_context);
-
-        visualize_bdd(result, 0);
-        visualize_bdd(init, 1);
         result = sylvan_and(result, init);
-        visualize_bdd(result, 2);
         if (result == sylvan_false) {
             warn("%d is FALSE", i);
         } else {
@@ -356,53 +388,52 @@ do_ss_things(andl_context_t *andl_context)
     if(debug) warn("Done building transition BDDS");
 
     //    while
-//    BDD cur = initState;
-//    sylvan_protect(&cur);
-//    BDD vis = cur;
-//    sylvan_protect(&vis);
-//
-//    do {
-//        vis = cur;
-//        for (int i = 0; i < andl_context->num_transitions; i = i + 1) {
-//            BDD r = sylvan_and(cur, transitions[i]);
-//
-//            r = sylvan_exists(r, transitions_set[i]);
-//            r = sylvan_compose(r, transitions_map[i]);
-//
-//            cur = sylvan_or(cur, r);
-//        }
-//    } while (cur != vis);
-//
-//    if (debug) warn("Done building state space");
-//
-//    //create result set
-//    BDD result = sylvan_set_empty();
-//    sylvan_protect(&result);
-//    cursor = andl_context->head;
-//    while (cursor != NULL) {
-//        result = sylvan_set_add(result, cursor->numPlace * 2);
-//        cursor = cursor->next;
-//    }
-//
-//    if (debug) warn("Done result set for satcount");
-//
-//    //print result
-//    warn("satcount of: %lf", sylvan_satcount(cur, result));
-//    warn("nodecount of: %lu", sylvan_nodecount(cur));
+    BDD cur = initState;
+    sylvan_protect(&cur);
+    BDD vis = cur;
+    sylvan_protect(&vis);
 
-//    visualize_bdd(cur);
+    do {
+        vis = cur;
+        for (int i = 0; i < andl_context->num_transitions; i = i + 1) {
+            BDD r = sylvan_and(cur, transitions[i]);
+
+            r = sylvan_exists(r, transitions_set[i]);
+            r = sylvan_compose(r, transitions_map[i]);
+
+            cur = sylvan_or(cur, r);
+        }
+    } while (cur != vis);
+
+    if (debug) warn("Done building state space");
+
+    //create result set
+    BDD result = sylvan_set_empty();
+    sylvan_protect(&result);
+    cursor = andl_context->head;
+    while (cursor != NULL) {
+        result = sylvan_set_add(result, cursor->numPlace * 2);
+        cursor = cursor->next;
+    }
+
+    if (debug) warn("Done result set for satcount");
+
+    //print result
+    warn("satcount of: %lf", sylvan_satcount(cur, result));
+    warn("nodecount of: %lu", sylvan_nodecount(cur));
+
+    //visualize_bdd(cur);
     check_formulas(transitions, transitions_set_p, transitions_map_p, initState, andl_context);
 
-//    sylvan_unprotect(&cur);
-//    sylvan_unprotect(&vis);
-//    sylvan_unprotect(&result);
+    sylvan_unprotect(&cur);
+    sylvan_unprotect(&vis);
+    sylvan_unprotect(&result);
 }
 
 /**
  * \brief An in-order parser of the given XML node.
  *
- * The default implementation is to print the temporal logic formula
- * on stderr.
+ * This function parses formulas to generate a tree
  */
 static int
 parse_formula(xmlNode *node, Tree_node* parent)
@@ -517,7 +548,7 @@ parse_xml(xmlNode *node)
         warn("Parsing formula...");
         res = parse_formula(xmlFirstElementChild(node), NULL);
         printf("\n");
-//        print_Tree_node(root, 0);
+    // print_Tree_node(root, 0);
         add_tree_to_array();
         printf("\n");
     // node not recognized
@@ -551,6 +582,10 @@ load_xml(const char* name)
     return res;
 }
 
+/**
+ * This changes a formulat to a standard normal form (E.G.
+ *  a form using only EX, EG and EU fragments
+ */
 Tree_node* check_formula(Tree_node* formula) {
     if (formula == NULL) {
         return NULL;
