@@ -1,0 +1,8 @@
+function mul_two_three(n1, n2) {
+	n3 = n1+n2
+	if (n % 2) {
+		n4 = n3*2
+	} else {
+		n3 = n3*3
+	}
+}
