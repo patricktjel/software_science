@@ -17,6 +17,7 @@
 (declare-fun c_2 () Bool)
 (declare-fun c_3 () Bool)
 (declare-fun c_4 () Bool)
+
 (assert (= c_0 true)); setup path conditions
 (assert (= n_3 (ite c_0 (+ n_1 n_2) n_0))); line 1
 (assert (= c_1 (and c_0 (= (mod n_3 2) 0)))); line 2 if
@@ -24,9 +25,7 @@
 (assert (= c_2 (and c_0 (not c_1)))); else
 (assert (= n_4 (ite c_2 (* n_3 2) n_0))); line 5 n_4 =
 (assert (= c_3 (or c_1 c_2))); end if
-;(assert (= c_4 (and c_3 (= (mod n_3 2) 0)))); final assert
-;(assert (= c_4 (not(and c_3 (= (mod n_3 2) 0))))); final assert
-;(assert (= c_4 (and c_3 (not(= (mod n_3 2) 0))))); final assert
-(assert (= c_4 true));
+(push) ; asserts could be anywhere so push needs to be done 
+(assert (and c_3 (not (= (mod n_4 2) 0)))) ; final assert
 (check-sat)
-(get-model)
+(pop)
