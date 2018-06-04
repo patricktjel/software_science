@@ -19,9 +19,9 @@
 (assert (= c_0 true)); setup path conditions
 (assert (= n_3 (ite c_0 (+ n_1 n_2) n_0))); line 1
 (assert (= c_1 (and c_0 (= (mod n_3 2) 0)))); line 2 if
-(assert (= n_4 (ite c_1 (* n_3 3) n_0))); line 3 n_4 = 
+(assert (= n_4 (ite c_1 (* n_3 3) n_3))); line 3 n_4 = 
 (assert (= c_2 (and c_0 (not c_1)))); else
-(assert (= n_4 (ite c_2 (* n_3 2) n_0))); line 5 n_4 =
+(assert (= n_4 (ite c_2 (* n_3 2) n_3))); line 5 n_4 =
 (assert (= c_3 (or c_1 c_2))); end if
 (push) ; asserts could be anywhere so push needs to be done 
 (assert (and c_3 (not (= (mod n_4 2) 0)))) ; final assert
