@@ -4,8 +4,7 @@
 ;c_2 = c_0 && ! c_1
 ;	n_4 = c_2 ? n_3 * 2 : n_0
 ;c_3 = c_1 || c_2
-;assert (c_3 && n_3 % 2 == 0)
-
+;assert (c_3 && n_4 % 2 == 0)
 
 (declare-fun n_0 () Int)
 (declare-fun n_1 () Int)
@@ -16,7 +15,6 @@
 (declare-fun c_1 () Bool)
 (declare-fun c_2 () Bool)
 (declare-fun c_3 () Bool)
-(declare-fun c_4 () Bool)
 
 (assert (= c_0 true)); setup path conditions
 (assert (= n_3 (ite c_0 (+ n_1 n_2) n_0))); line 1
