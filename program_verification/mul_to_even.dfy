@@ -1,3 +1,7 @@
+// This method adds two numbers.
+// If this number is even than we multiply the number by 3
+// Else the number is multiplied by 2
+// The result will always be even.
 method Mul_to_even(n1: int, n2: int) returns (n3:int) {
     n3 := n1 + n2;
     if (n3 % 2 == 0) {
