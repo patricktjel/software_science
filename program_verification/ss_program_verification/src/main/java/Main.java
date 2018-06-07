@@ -4,7 +4,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.util.Optional;
 
-public class Msain {
+public class Main {
 
     public static void main(String[] args) {
         CompilationUnit compilationUnit = JavaParser.parse("class A { }");
