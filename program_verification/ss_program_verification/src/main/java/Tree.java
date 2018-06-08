@@ -1,3 +1,5 @@
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
 public class Tree<T> {
     private T data;
     private Tree<T> left;
@@ -8,10 +10,16 @@ public class Tree<T> {
     }
 
     public void addLeftNode(Tree<T> toAdd) {
+        if (left != null) {
+            throw new RuntimeException("Tree already has a right node");
+        }
         this.left = toAdd;
     }
 
     public void addRightNode(Tree<T> toAdd) {
+        if (right != null) {
+            throw new RuntimeException("Tree already has a right node");
+        }
         this.right = toAdd;
     }
 

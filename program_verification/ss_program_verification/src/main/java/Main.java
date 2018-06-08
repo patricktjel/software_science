@@ -45,7 +45,7 @@ public class Main {
         vars.put("c_0", "Bool");
         for (Node child : node.getChildNodes()) {
             if (child instanceof ExpressionStmt) {
-              parseExpression(child);
+                parseExpression(child);
             } else if (child instanceof IfStmt) {
                 parseITE((IfStmt) child);
             } else if (child instanceof AssertStmt) {
@@ -57,6 +57,12 @@ public class Main {
 
     private static void parseAssert(AssertStmt node) {
         addAssertion("assert (" + "c_" + path + " && " + node.getCheck().toString() + ")");
+        Tree<String> a = new Tree<>("assert");
+        Tree<String> and = new Tree<>("&&");
+        a.addLeftNode(and);
+        and.addLeftNode(new Tree<>("c_" + path));
+        and.addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
+        a.print(0);
     }
 
     private static void parseExpression(Node node) {
@@ -67,6 +73,7 @@ public class Main {
         String pathName = "c_" + path;
         vars.put(name, decl.getTypeAsString());
 
+        Tree<String> tree = new Tree<>("=");
         // This has the form of var_name = path_con ? decl : var_name
         addAssertion(name + " = " + pathName + " ? " + decl.getInitializer().get().toString() + " : " + name);
     }
@@ -86,12 +93,18 @@ public class Main {
 
         //Build a tree
         Tree<String> tree = new Tree<>("=");
-        tree.addLeftNode(new Tree<>("ifPath"));
+        tree.addLeftNode(new Tree<>(ifPath));
+        Tree<String> and = new Tree<>("&&");
+        tree.addRightNode(and);
+        and.addLeftNode(new Tree<>(oldPath));
+
 
         Tree<String> iteTree = parseBinExpression(con);
         //tree.addLeftNode();
         //If body
-        System.out.print("\t");
+
+        and.addRightNode(iteTree);
+        tree.print(0);
         path++;
         parseExpression((node).getThenStmt().getChildNodes().get(0));
         //Else statement
