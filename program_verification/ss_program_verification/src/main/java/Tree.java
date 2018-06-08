@@ -1,12 +1,22 @@
-import com.sun.javaws.exceptions.InvalidArgumentException;
-
 public class Tree<T> {
     private T data;
     private Tree<T> left;
-    private  Tree<T> right;
+    private Tree<T> right;
 
     public Tree(T data) {
         this.data = data;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public Tree<T> getLeft() {
+        return left;
+    }
+
+    public Tree<T> getRight() {
+        return right;
     }
 
     public void addLeftNode(Tree<T> toAdd) {

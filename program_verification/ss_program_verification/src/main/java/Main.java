@@ -9,8 +9,7 @@ import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
+import com.microsoft.z3.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -181,11 +180,9 @@ public class Main {
         // set default path condition value
         printAssert(ctx.mkEq(z3Vars.get("c_0"), ctx.mkBool(true)));
 
-        asserts.forEach(s -> {
-            String[] assert_parts = s.split(" ");
-            for (String part : assert_parts) {
-//                System.out.println("help");
-            }
+        lines.forEach(tree -> {
+            Expr expr = parseSSATree(tree, ctx);
+            printAssert(expr);
         });
 
         ctx.close();
@@ -193,5 +190,50 @@ public class Main {
 
     private static void printAssert(Expr smt2) {
         System.out.println("(assert " + smt2 + ")");
+    }
+
+    private static Expr parseSSATree(Tree<String> tree, Context ctx) {
+        // base case; it's a leave
+        if (tree.getLeft() == null && tree.getRight() == null) {
+            if (z3Vars.containsKey(tree.getData())) {
+                return z3Vars.get(tree.getData());
+            } else {
+                return ctx.mkInt(tree.getData());
+            }
+        }
+
+        // else parse it's leaves
+        switch (tree.getData().toLowerCase()) {
+            case "assert":
+                return parseSSATree(tree.getLeft(), ctx);
+            case "==":
+            case "=":
+                return ctx.mkEq(parseSSATree(tree.getLeft(), ctx),
+                        parseSSATree(tree.getRight(), ctx));
+            case "?":
+                return ctx.mkITE((BoolExpr) parseSSATree(tree.getLeft(), ctx),
+                        parseSSATree(tree.getRight().getLeft(), ctx),
+                        parseSSATree(tree.getRight().getRight(), ctx));
+            case "&&":
+                return ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft(), ctx),
+                        (BoolExpr) parseSSATree(tree.getRight(), ctx));
+            case "||":
+                return ctx.mkOr((BoolExpr) parseSSATree(tree.getLeft(), ctx),
+                        (BoolExpr) parseSSATree(tree.getRight(), ctx));
+            case "%":
+                return ctx.mkMod((IntExpr)parseSSATree(tree.getLeft(), ctx),
+                        (IntExpr) parseSSATree(tree.getRight(),ctx));
+            case "+":
+                return ctx.mkAdd((ArithExpr)parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr)parseSSATree(tree.getRight(), ctx));
+            case "-":
+                return ctx.mkSub((ArithExpr)parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr)parseSSATree(tree.getRight(), ctx));
+            case "*":
+                return ctx.mkMul((ArithExpr)parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr)parseSSATree(tree.getRight(), ctx));
+            default:
+                return null;
+        }
     }
 }
