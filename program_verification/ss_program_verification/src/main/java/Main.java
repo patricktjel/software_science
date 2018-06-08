@@ -23,7 +23,7 @@ public class Main {
     private static Map<String, String> vars = new HashMap<>();
     private static List<String> asserts = new ArrayList<>();
     private static int path = 0;
-    private ArrayList<Tree<String>> lines = new ArrayList();
+    private static final ArrayList<Tree<String>> lines = new ArrayList<>();
 
 
     private static Map<String, Expr> z3Vars = new HashMap<>();
@@ -63,6 +63,7 @@ public class Main {
         and.addLeftNode(new Tree<>("c_" + path));
         and.addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
         a.print(0);
+        lines.add(a);
     }
 
     private static void parseExpression(Node node) {
@@ -89,6 +90,7 @@ public class Main {
             thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
         }
 
+        lines.add(tree);
         tree.print(0);
         // This has the form of var_name = path_con ? decl : var_name
         addAssertion(name + " = " + pathName + " ? " + decl.getInitializer().get().toString() + " : " + name);
@@ -121,11 +123,13 @@ public class Main {
 
         and.addRightNode(iteTree);
         tree.print(0);
+        lines.add(tree);
         path++;
         parseExpression((node).getThenStmt().getChildNodes().get(0));
         //Else statement
         addAssertion(elsePath + " = " + oldPath + " && ! " + ifPath);
         path++;
+
         //Only print an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
             parseExpression((node).getElseStmt().get().getChildNodes().get(0));
