@@ -1138,8 +1138,11 @@ class JavaExample
         Log.append("FindModelExample1");
 
         BoolExpr x = ctx.mkBoolConst("x");
+        System.out.println(x.getFuncDecl().toString());
         BoolExpr y = ctx.mkBoolConst("y");
+        System.out.println(y.getFuncDecl().toString());
         BoolExpr x_xor_y = ctx.mkXor(x, y);
+        System.out.println("(assert" + x_xor_y.toString() + ")");
 
         Model model = check(ctx, x_xor_y, Status.SATISFIABLE);
         System.out.println("x = " + model.evaluate(x, false) + ", y = "
@@ -2278,14 +2281,14 @@ class JavaExample
                 Context ctx = new Context(cfg);
 
 //                p.optimizeExample(ctx);
-                p.basicTests(ctx);
+//                p.basicTests(ctx);
 //                p.castingTest(ctx);
 //                p.sudokuExample(ctx);
 //                p.quantifierExample1(ctx);
 //                p.quantifierExample2(ctx);
 //                p.logicExample(ctx);
 //                p.parOrExample(ctx);
-//                p.findModelExample1(ctx);
+                p.findModelExample1(ctx);
 //                p.findModelExample2(ctx);
 //                p.pushPopExample1(ctx);
 //                p.arrayExample1(ctx);
