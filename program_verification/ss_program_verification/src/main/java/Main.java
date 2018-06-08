@@ -74,6 +74,22 @@ public class Main {
         vars.put(name, decl.getTypeAsString());
 
         Tree<String> tree = new Tree<>("=");
+        tree.addLeftNode(new Tree<>(name));
+
+        Tree<String> op = new Tree<>("?");
+        tree.addRightNode(op);
+        op.addLeftNode(new Tree<>(pathName));
+
+        Tree<String> thenElse = new Tree<>(":");
+        op.addRightNode(thenElse);
+        thenElse.addRightNode(new Tree<>(name));
+        if (decl.getInitializer().get() instanceof BinaryExpr) {
+            thenElse.addLeftNode(parseBinExpression((BinaryExpr) decl.getInitializer().get()));
+        } else {
+            thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
+        }
+
+        tree.print(0);
         // This has the form of var_name = path_con ? decl : var_name
         addAssertion(name + " = " + pathName + " ? " + decl.getInitializer().get().toString() + " : " + name);
     }
@@ -110,7 +126,6 @@ public class Main {
         //Else statement
         addAssertion(elsePath + " = " + oldPath + " && ! " + ifPath);
         path++;
-        System.out.print("\t");
         //Only print an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
             parseExpression((node).getElseStmt().get().getChildNodes().get(0));
