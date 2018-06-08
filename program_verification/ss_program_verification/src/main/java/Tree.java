@@ -1,5 +1,3 @@
-import javax.xml.crypto.Data;
-
 public class Tree<T> {
     private T data;
     private Tree<T> left;

@@ -5,8 +5,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -90,7 +88,7 @@ public class Main {
         Tree<String> tree = new Tree<>("=");
         tree.addLeftNode(new Tree<>("ifPath"));
 
-        Tree<String> exp  = new Tree<>(con.getOperator().asString());
+        Tree<String> iteTree = parseBinExpression(con);
         //tree.addLeftNode();
         //If body
         System.out.print("\t");
@@ -115,9 +113,22 @@ public class Main {
         asserts.add(assertion);
     }
 
-    private static Tree<String> parseBinExpresion(BinaryExpr node, Tree tree) {
-        //Tree<String> root =  node.getOperator().asString();
-        return null;
+    private static Tree<String> parseBinExpression(BinaryExpr node) {
+        Tree<String> root =  new Tree<>(node.getOperator().asString());
+        //Check left node
+        if (node.getLeft() instanceof BinaryExpr) {
+            root.addLeftNode(parseBinExpression((BinaryExpr) node.getLeft()));
+        } else {
+            root.addLeftNode(new Tree<>(node.getLeft().toString()));
+        }
+
+        //Check right node
+        if (node.getRight() instanceof BinaryExpr) {
+            root.addRightNode(parseBinExpression((BinaryExpr) node.getRight()));
+        } else {
+            root.addRightNode(new Tree<>(node.getRight().toString()));
+        }
+        return root;
     }
 
     private static void parseToZ3 () {
