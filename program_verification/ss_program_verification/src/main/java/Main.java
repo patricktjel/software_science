@@ -2,7 +2,9 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
@@ -28,7 +30,11 @@ public class Main {
     public static void main(String[] args) throws IOException {
         CompilationUnit compilationUnit = JavaParser.parseResource("Example.java");
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
+        for (Parameter parameter : method.getParameters()) {
+            vars.put(parameter.getNameAsString(), parameter.getTypeAsString());
+        }
         BlockStmt code = (BlockStmt) method.getChildNodes().get(method.getChildNodes().size() - 1);
+
         parseMethodToSSA(code);
     }
 
@@ -37,22 +43,59 @@ public class Main {
         vars.put("c_0", "Bool");
         for (Node child : node.getChildNodes()) {
             if (child instanceof ExpressionStmt) {
-                //Expression Check if the path condition holds,
-                VariableDeclarator decl = (VariableDeclarator) child.getChildNodes().get(0).getChildNodes().get(0);
-                String name = decl.getNameAsString();
-                String pathName = "c_" + path;
-                vars.put(name, decl.getTypeAsString());
-
-                // This has the form of var_name = path_con ? decl : var_name
-                String assertion = name + " = " + pathName + " ? " + decl.getInitializer().get().toString() + " : " + name;
-                System.out.println(assertion);
-                asserts.add(assertion);
+              parseExpression(child);
             } else if (child instanceof IfStmt) {
-                // If statements
-                String pathName = "c_" + path + 1 ;
+                parseITE((IfStmt) child);
+            } else if (child instanceof AssertStmt) {
+                parseAssert((AssertStmt) child);
             }
         }
         parseToZ3();
+    }
+
+    private static void parseAssert(AssertStmt node) {
+        addAssertion("assert (" + "c_" + path + " && " + node.getCheck().toString() + ")");
+    }
+
+    private static void parseExpression(Node node) {
+        //System.out.println("Expression .... + " + node.toString());
+        //Expression Check if the path condition holds,
+        VariableDeclarator decl = (VariableDeclarator) node.getChildNodes().get(0).getChildNodes().get(0);
+        String name = decl.getNameAsString();
+        String pathName = "c_" + path;
+        vars.put(name, decl.getTypeAsString());
+
+        // This has the form of var_name = path_con ? decl : var_name
+        addAssertion(name + " = " + pathName + " ? " + decl.getInitializer().get().toString() + " : " + name);
+    }
+
+    private static void parseITE(IfStmt node) {
+        // If statements
+        String ifPath = "c_" + (path + 1);
+        String elsePath = "c_" + (path + 2);
+        String oldPath = "c_" + path;
+        //If condition
+        addAssertion(ifPath + " = " + oldPath + " && (" + ((node).getCondition().toString() + ")"));
+        //If body
+        System.out.print("\t");
+        path++;
+        parseExpression((node).getThenStmt().getChildNodes().get(0));
+        //Else statement
+        addAssertion(elsePath + " = " + oldPath + " && ! " + ifPath);
+        path++;
+        System.out.print("\t");
+        //Only print an if body if the if body is present
+        if (node.getElseStmt().isPresent()) {
+            parseExpression((node).getElseStmt().get().getChildNodes().get(0));
+        }
+
+        path++;
+        addAssertion("c_" + path + " = " + ifPath + " || " + elsePath);
+    }
+
+    private static void addAssertion(String assertion) {
+        System.out.println(assertion);
+        asserts.add(assertion);
     }
 
     private static void parseToZ3 () {
@@ -76,7 +119,7 @@ public class Main {
         asserts.forEach(s -> {
             String[] assert_parts = s.split(" ");
             for (String part : assert_parts) {
-                System.out.println("help");
+//                System.out.println("help");
             }
         });
 
