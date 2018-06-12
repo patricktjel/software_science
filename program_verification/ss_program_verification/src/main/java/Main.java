@@ -8,6 +8,9 @@ import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.*;
 import com.microsoft.z3.*;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +31,12 @@ public class Main {
      * Parsing based on https://tomassetti.me/parsing-in-java/#javaLibraries
      */
     public static void main(String[] args) throws IOException {
-        CompilationUnit compilationUnit = JavaParser.parseResource(args[0]);
+        File file = new File(args[0]);
+        CompilationUnit compilationUnit = JavaParser.parse(file);
+        FileInputStream in = new FileInputStream(args[0]);
+
+        // parse the file
+        CompilationUnit cu = JavaParser.parse(in);
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
         for (Parameter parameter : method.getParameters()) {
             vars.put(parameter.getNameAsString(), parameter.getTypeAsString());
