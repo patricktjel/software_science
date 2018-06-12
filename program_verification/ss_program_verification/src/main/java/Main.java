@@ -127,7 +127,19 @@ public class Main {
         path++;
         parseExpression((node).getThenStmt().getChildNodes().get(0));
         //Else statement
-        addAssertion(elsePath + " = " + oldPath + " && ! " + ifPath);
+
+        Tree<String> elseTree = new Tree<>("=");
+        elseTree.addLeftNode(new Tree<>(elsePath));
+
+        Tree<String> conjunction = new Tree<>("&&");
+        elseTree.addRightNode(conjunction);
+        conjunction.addLeftNode(new Tree<>(oldPath));
+
+        Tree<String> negation = new Tree<>("!");
+        conjunction.addRightNode(negation);
+        negation.addLeftNode(new Tree<>(ifPath));
+
+        lines.add(elseTree);
         path++;
 
         //Only print an if body if the if body is present
@@ -137,6 +149,12 @@ public class Main {
 
         path++;
         addAssertion("c_" + path + " = " + ifPath + " || " + elsePath);
+        Tree<String> endIf = new Tree<>("=");
+        endIf.addLeftNode(new Tree<>("c_" + path));
+        Tree<String> disjunction = new Tree<>("||");
+        endIf.addRightNode(disjunction);
+        disjunction.addLeftNode(new Tree<>(ifPath));
+        disjunction.addRightNode(new Tree<>(elsePath));
         vars.put("c_" + path, "Bool");
     }
 
