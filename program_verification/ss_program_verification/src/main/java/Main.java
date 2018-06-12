@@ -28,7 +28,7 @@ public class Main {
      * Parsing based on https://tomassetti.me/parsing-in-java/#javaLibraries
      */
     public static void main(String[] args) throws IOException {
-        CompilationUnit compilationUnit = JavaParser.parseResource("Example.java");
+        CompilationUnit compilationUnit = JavaParser.parseResource(args[0]);
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
         for (Parameter parameter : method.getParameters()) {
             vars.put(parameter.getNameAsString(), parameter.getTypeAsString());
