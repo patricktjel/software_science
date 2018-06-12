@@ -75,6 +75,14 @@ public class Main {
      * @param node The node containingthe while statement
      */
     private static void parseWhile(WhileStmt node) {
+
+        // the line before a while is always a precondition.
+        {
+            Tree<String> pre_condition = lines.remove(lines.size() - 1);
+            lines.add(new Tree<>("push"));
+            lines.add(pre_condition);
+        }
+
         // invariant & condition should hold
         {
             String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
@@ -88,17 +96,35 @@ public class Main {
             System.out.println("(assertinv (" + parsed_inv + " && " + node.getCondition() + "))");
             tree.print(0);
             lines.add(tree);
+            lines.add(new Tree<>("check-sat"));
+            lines.add(new Tree<>("pop"));
+        }
+        // create a new path variable
+        {
+            path++;
+            vars.put("c_"+path, "bool");
+            Tree<String> condition_path = new Tree<>("=");
+            condition_path.addLeftNode(new Tree<>("c_" + path));
+            Tree<String> and = new Tree<>("&&");
+            and.addLeftNode(new Tree<>("c_" + (path - 1)));
+            and.addRightNode(parseBinExpression((BinaryExpr) node.getCondition()));
+            condition_path.addRightNode(and);
+            lines.add(condition_path);
         }
         // the body
         {
+            Tree<String> bodyImplies = new Tree<>("=>");
+            bodyImplies.addLeftNode(new Tree<>("c_" + path));
             Node expr = node.getChildNodes().get(1).getChildNodes().get(0);
             Tree<String> body = parseExpression(expr);
             System.out.println(expr.getChildNodes().get(0));
             body.print(0);
-            lines.add(body);
+            bodyImplies.addRightNode(body);
+            lines.add(bodyImplies);
         }
         //afterwards the invariant should still hold
         {
+            lines.add(new Tree<>("push"));
             String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
             Expression parsed_inv = JavaParser.parseExpression(inv);
             Tree<String> invariant = new Tree<>("assertinv");
@@ -106,6 +132,8 @@ public class Main {
             System.out.println("(assertinv (" + parsed_inv + ") )");
             invariant.print(0);
             lines.add(invariant);
+            lines.add(new Tree<>("check-sat"));
+            lines.add(new Tree<>("pop"));
         }
     }
 
@@ -114,6 +142,7 @@ public class Main {
      * @param node The node containing the assert statement
      */
     private static void parseAssert(AssertStmt node) {
+        lines.add(new Tree<>("push"));
         Tree<String> a = new Tree<>("assert");
         Tree<String> and = new Tree<>("&&");
         a.addLeftNode(and);
@@ -121,6 +150,8 @@ public class Main {
         and.addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
         a.print(0);
         lines.add(a);
+        lines.add(new Tree<>("check-sat"));
+        lines.add(new Tree<>("pop"));
     }
 
     /**
@@ -270,7 +301,7 @@ public class Main {
 
         // create an assertion for every code line.
         lines.forEach(tree -> {
-            Expr expr = parseSSATree(tree, ctx);
+            Object expr = parseSSATree(tree, ctx);
             printAssert(expr);
         });
 
@@ -281,9 +312,13 @@ public class Main {
      * Surrounds and smt expression with (assert ..)
      * @param smt2 the expression
      */
-    private static void printAssert(Expr smt2) {
+    private static void printAssert(Object smt2) {
         if (smt2 != null) {
-            System.out.println("(assert " + smt2 + ")");
+            if (smt2 instanceof Expr) {
+                System.out.println("(assert " + smt2 + ")");
+            } else {
+                System.out.println(smt2);
+            }
         }
     }
 
@@ -294,7 +329,17 @@ public class Main {
      * @return the z3 expression or null if the expression was already printed (e.g. to add push/pop)
      */
     @SuppressWarnings("ConstantConditions")
-    private static Expr parseSSATree(Tree<String> tree, Context ctx) {
+    private static Object parseSSATree(Tree<String> tree, Context ctx) {
+        // also part of the base case
+        switch (tree.getData().toLowerCase()){
+            case "check-sat":
+                return "(check-sat)";
+            case "pop":
+                return "(pop)";
+            case "push":
+                return "(push)";
+        }
+
         // base case; it's a leave
         if (tree.getLeft() == null && tree.getRight() == null) {
             if (z3Vars.containsKey(tree.getData())) {
@@ -307,21 +352,14 @@ public class Main {
         // else parse it's leaves
         switch (tree.getData().toLowerCase()) {
             case "assert":
-                System.out.println("(push)");
-                BoolExpr boolExpr = ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
+                return ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
                         ctx.mkNot((BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
-                printAssert(boolExpr);
-                System.out.println("(check-sat)");
-                System.out.println("(pop)");
-                return null;
             case "assertinv":
-                System.out.println("(push)");
-                BoolExpr expr = ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
+                return ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
                         (BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
-                printAssert(expr);
-                System.out.println("(check-sat)");
-                System.out.println("(pop)");
-                return null;
+            case "=>":
+                return ctx.mkImplies((BoolExpr) parseSSATree(tree.getLeft(), ctx),
+                        (BoolExpr) parseSSATree(tree.getRight(), ctx));
             case "<=":
                 return ctx.mkLe((ArithExpr) parseSSATree(tree.getLeft(), ctx),
                         (ArithExpr) parseSSATree(tree.getRight(), ctx));
@@ -336,17 +374,17 @@ public class Main {
                         (ArithExpr) parseSSATree(tree.getRight(), ctx));
             case "==":
             case "=":
-                return ctx.mkEq(parseSSATree(tree.getLeft(), ctx),
-                        parseSSATree(tree.getRight(), ctx));
+                return ctx.mkEq((Expr)parseSSATree(tree.getLeft(), ctx),
+                        (Expr)parseSSATree(tree.getRight(), ctx));
             case "!=":
-                return ctx.mkNot(ctx.mkEq(parseSSATree(tree.getLeft(), ctx),
-                        parseSSATree(tree.getRight(), ctx)));
+                return ctx.mkNot(ctx.mkEq((Expr)parseSSATree(tree.getLeft(), ctx),
+                        (Expr)parseSSATree(tree.getRight(), ctx)));
             case "!":
                 return ctx.mkNot((BoolExpr) parseSSATree(tree.getLeft(), ctx));
             case "?":
                 return ctx.mkITE((BoolExpr) parseSSATree(tree.getLeft(), ctx),
-                        parseSSATree(tree.getRight().getLeft(), ctx),
-                        parseSSATree(tree.getRight().getRight(), ctx));
+                        (Expr)parseSSATree(tree.getRight().getLeft(), ctx),
+                        (Expr)parseSSATree(tree.getRight().getRight(), ctx));
             case "&&":
                 return ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft(), ctx),
                         (BoolExpr) parseSSATree(tree.getRight(), ctx));
