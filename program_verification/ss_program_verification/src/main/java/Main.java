@@ -123,6 +123,7 @@ public class Main {
         and.addRightNode(iteTree);
         tree.print(0);
         lines.add(tree);
+        tree.print(0);
         path++;
         parseExpression((node).getThenStmt().getChildNodes().get(0));
         //Else statement
@@ -139,6 +140,7 @@ public class Main {
         negation.addLeftNode(new Tree<>(ifPath));
 
         lines.add(elseTree);
+        elseTree.print(0);
         path++;
 
         //Only print an if body if the if body is present
@@ -154,6 +156,7 @@ public class Main {
         endIf.addRightNode(disjunction);
         disjunction.addLeftNode(new Tree<>(ifPath));
         disjunction.addRightNode(new Tree<>(elsePath));
+        endIf.print(0);
         vars.put("c_" + path, "Bool");
     }
 
