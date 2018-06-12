@@ -5,13 +5,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.stmt.AssertStmt;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.stmt.*;
 import com.microsoft.z3.*;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,9 +46,41 @@ public class Main {
                 parseITE((IfStmt) child);
             } else if (child instanceof AssertStmt) {
                 parseAssert((AssertStmt) child);
+            } else if (child instanceof WhileStmt) {
+                parseWhile((WhileStmt) child);
             }
         }
         parseToZ3();
+    }
+
+    private static void parseWhile(WhileStmt node) {
+        // invariant & condition should hold
+        {
+            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
+            Expression parsed_inv = JavaParser.parseExpression(inv);
+            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
+            Tree<String> tree = new Tree<>("&&");
+            tree.addLeftNode(invariant);
+            tree.addRightNode(condition);
+            System.out.println("(" + parsed_inv + " && " + node.getCondition() + ")");
+            tree.print(0);
+            lines.add(tree);
+        }
+        // the body
+        {
+            Tree<String> body = parseExpression(node.getChildNodes().get(1).getChildNodes().get(0).getChildNodes().get(0));
+            body.print(0);
+            lines.add(body);
+        }
+        //afterwards the invariant should still hold
+        {
+            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
+            Expression parsed_inv = JavaParser.parseExpression(inv);
+            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            invariant.print(0);
+            lines.add(invariant);
+        }
     }
 
     private static void parseAssert(AssertStmt node) {
