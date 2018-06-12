@@ -268,6 +268,7 @@ public class Main {
         // set default path condition value
         printAssert(ctx.mkEq(z3Vars.get("c_0"), ctx.mkBool(true)));
 
+        // create an assertion for every code line.
         lines.forEach(tree -> {
             Expr expr = parseSSATree(tree, ctx);
             printAssert(expr);
@@ -275,7 +276,6 @@ public class Main {
 
         ctx.close();
     }
-
 
     /**
      * Surrounds and smt expression with (assert ..)
