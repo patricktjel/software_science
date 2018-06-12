@@ -69,16 +69,19 @@ public class Main {
             Expression parsed_inv = JavaParser.parseExpression(inv);
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
-            Tree<String> tree = new Tree<>("&&");
-            tree.addLeftNode(invariant);
-            tree.addRightNode(condition);
-            System.out.println("(" + parsed_inv + " && " + node.getCondition() + ")");
+            Tree<String> tree = new Tree<>("assertinv");
+            tree.addLeftNode(new Tree<>("&&"));
+            tree.getLeft().addLeftNode(invariant);
+            tree.getLeft().addRightNode(condition);
+            System.out.println("(assertinv (" + parsed_inv + " && " + node.getCondition() + "))");
             tree.print(0);
             lines.add(tree);
         }
         // the body
         {
-            Tree<String> body = parseExpression(node.getChildNodes().get(1).getChildNodes().get(0).getChildNodes().get(0));
+            Node expr = node.getChildNodes().get(1).getChildNodes().get(0);
+            Tree<String> body = parseExpression(expr);
+            System.out.println(expr.getChildNodes().get(0));
             body.print(0);
             lines.add(body);
         }
@@ -86,7 +89,9 @@ public class Main {
         {
             String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
             Expression parsed_inv = JavaParser.parseExpression(inv);
-            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            Tree<String> invariant = new Tree<>("assertinv");
+            invariant.addLeftNode(parseBinExpression((BinaryExpr) parsed_inv));
+            System.out.println("(assertinv (" + parsed_inv + ") )");
             invariant.print(0);
             lines.add(invariant);
         }
@@ -277,6 +282,26 @@ public class Main {
                 System.out.println("(check-sat)");
                 System.out.println("(pop)");
                 return null;
+            case "assertinv":
+                System.out.println("(push)");
+                BoolExpr expr = ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
+                        (BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
+                printAssert(expr);
+                System.out.println("(check-sat)");
+                System.out.println("(pop)");
+                return null;
+            case "<=":
+                return ctx.mkLe((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
+            case "<":
+                return ctx.mkLt((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
+            case ">=":
+                return ctx.mkGe((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
+            case ">":
+                return ctx.mkGt((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
             case "==":
             case "=":
                 return ctx.mkEq(parseSSATree(tree.getLeft(), ctx),
