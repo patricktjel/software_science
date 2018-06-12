@@ -113,14 +113,11 @@ public class Main {
         }
         // the body
         {
-            Tree<String> bodyImplies = new Tree<>("=>");
-            bodyImplies.addLeftNode(new Tree<>("c_" + path));
             Node expr = node.getChildNodes().get(1).getChildNodes().get(0);
             Tree<String> body = parseExpression(expr);
             System.out.println(expr.getChildNodes().get(0));
             body.print(0);
-            bodyImplies.addRightNode(body);
-            lines.add(bodyImplies);
+            lines.add(body);
         }
         //afterwards the invariant should still hold
         {
