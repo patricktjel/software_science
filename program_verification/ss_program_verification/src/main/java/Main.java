@@ -125,7 +125,7 @@ public class Main {
 
     /**
      * Parses an expression and
-     * @param node
+     * @param node the expression to parse
      */
     private static Tree<String> parseExpression(Node node) {
         //Expression Check if the path condition holds,
@@ -153,6 +153,10 @@ public class Main {
         return tree;
     }
 
+    /**
+     * Creates trees for ITE statements (one tree for the if, one for if body, one for else, one for else body and one for the close of the if)
+     * @param node the node containing the ite statement
+     */
     private static void parseITE(IfStmt node) {
         // If statements
         String ifPath = "c_" + (path + 1);
@@ -242,6 +246,9 @@ public class Main {
         return root;
     }
 
+    /**
+     * Creates smt2 format and prints it to the command line
+     */
     private static void parseToZ3 () {
         Context ctx = new Context();
 
@@ -268,12 +275,24 @@ public class Main {
         ctx.close();
     }
 
+
+    /**
+     * Surrounds and smt expression with (assert ..)
+     * @param smt2 the expression
+     */
     private static void printAssert(Expr smt2) {
         if (smt2 != null) {
             System.out.println("(assert " + smt2 + ")");
         }
     }
 
+    /**
+     * parses one tree (e.g. one line of a file)
+     * @param tree The tree to parse
+     * @param ctx the context of z3
+     * @return the z3 expression or null if the expression was already printed (e.g. to add push/pop)
+     */
+    @SuppressWarnings("ConstantConditions")
     private static Expr parseSSATree(Tree<String> tree, Context ctx) {
         // base case; it's a leave
         if (tree.getLeft() == null && tree.getRight() == null) {
