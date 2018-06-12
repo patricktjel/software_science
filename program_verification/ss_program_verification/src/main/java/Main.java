@@ -62,6 +62,10 @@ public class Main {
         parseToZ3();
     }
 
+    /**
+     * Parse a statement in the form of 'while ...'
+     * @param node The node containingthe while statement
+     */
     private static void parseWhile(WhileStmt node) {
         // invariant & condition should hold
         {
