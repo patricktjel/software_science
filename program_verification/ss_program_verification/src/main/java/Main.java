@@ -10,7 +10,6 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.microsoft.z3.*;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,14 +20,17 @@ import java.util.Map;
 public class Main {
 
     private static Map<String, String> vars = new HashMap<>();
-    private static List<String> asserts = new ArrayList<>();
     private static int path = 0;
     private static final ArrayList<Tree<String>> lines = new ArrayList<>();
 
-
     private static Map<String, Expr> z3Vars = new HashMap<>();
 
-    //https://tomassetti.me/parsing-in-java/#javaLibraries
+
+    /**
+     * The first method gets parsed.
+     *
+     * Parsing based on https://tomassetti.me/parsing-in-java/#javaLibraries
+     */
     public static void main(String[] args) throws IOException {
         CompilationUnit compilationUnit = JavaParser.parseResource("Example.java");
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
@@ -40,12 +42,19 @@ public class Main {
         parseMethodToSSA(code);
     }
 
+    /**
+     * Parses the content of a method
+     *
+     * @param node the node containing the method
+     */
     static void parseMethodToSSA(Node node) {
         //Set up initial Path variables
         vars.put("c_0", "Bool");
         for (Node child : node.getChildNodes()) {
             if (child instanceof ExpressionStmt) {
-                parseExpression(child);
+                Tree<String> tree = parseExpression(child);
+                tree.print(0);
+                lines.add(tree);
             } else if (child instanceof IfStmt) {
                 parseITE((IfStmt) child);
             } else if (child instanceof AssertStmt) {
@@ -55,8 +64,11 @@ public class Main {
         parseToZ3();
     }
 
+    /**
+     * Parse a statement in the form of 'assert ... '
+     * @param node The node containing the assert statement
+     */
     private static void parseAssert(AssertStmt node) {
-        addAssertion("assert (" + "c_" + path + " && " + node.getCheck().toString() + ")");
         Tree<String> a = new Tree<>("assert");
         Tree<String> and = new Tree<>("&&");
         a.addLeftNode(and);
@@ -66,8 +78,11 @@ public class Main {
         lines.add(a);
     }
 
-    private static void parseExpression(Node node) {
-        //System.out.println("Expression .... + " + node.toString());
+    /**
+     * Parses an expression and
+     * @param node
+     */
+    private static Tree<String> parseExpression(Node node) {
         //Expression Check if the path condition holds,
         VariableDeclarator decl = (VariableDeclarator) node.getChildNodes().get(0).getChildNodes().get(0);
         String name = decl.getNameAsString();
@@ -90,10 +105,7 @@ public class Main {
             thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
         }
 
-        lines.add(tree);
-        tree.print(0);
-        // This has the form of var_name = path_con ? decl : var_name
-        addAssertion(name + " = " + pathName + " ? " + decl.getInitializer().get().toString() + " : " + name);
+        return tree;
     }
 
     private static void parseITE(IfStmt node) {
@@ -104,8 +116,6 @@ public class Main {
         vars.put(ifPath, "Bool");
         vars.put(elsePath, "Bool");
 
-        //If condition
-        addAssertion(ifPath + " = " + oldPath + " && (" + ((node).getCondition().toString() + ")"));
 
         BinaryExpr con = (BinaryExpr) node.getCondition();
 
@@ -126,7 +136,9 @@ public class Main {
         lines.add(tree);
         tree.print(0);
         path++;
-        parseExpression((node).getThenStmt().getChildNodes().get(0));
+        Tree<String> expTree = parseExpression((node).getThenStmt().getChildNodes().get(0));
+        tree.print(0);
+        lines.add(expTree);
         //Else statement
 
         Tree<String> elseTree = new Tree<>("=");
@@ -146,11 +158,11 @@ public class Main {
 
         //Only print an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
-            parseExpression((node).getElseStmt().get().getChildNodes().get(0));
+           Tree expr = parseExpression((node).getElseStmt().get().getChildNodes().get(0));
+           lines.add(expr);
         }
 
         path++;
-        addAssertion("c_" + path + " = " + ifPath + " || " + elsePath);
         Tree<String> endIf = new Tree<>("=");
         endIf.addLeftNode(new Tree<>("c_" + path));
         Tree<String> disjunction = new Tree<>("||");
@@ -162,11 +174,11 @@ public class Main {
         vars.put("c_" + path, "Bool");
     }
 
-    private static void addAssertion(String assertion) {
-        System.out.println(assertion);
-        asserts.add(assertion);
-    }
-
+    /**
+     * Recursively parse a binary expression and builds the tree representing this expression
+     * @param node the node
+     * @return the tree build for this expression
+     */
     private static Tree<String> parseBinExpression(BinaryExpr node) {
         Tree<String> root =  new Tree<>(node.getOperator().asString());
         //Check left node
@@ -184,6 +196,7 @@ public class Main {
         }
         return root;
     }
+
 
     private static void parseToZ3 () {
         Context ctx = new Context();
