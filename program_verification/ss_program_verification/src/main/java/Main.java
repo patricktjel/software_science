@@ -10,6 +10,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.microsoft.z3.*;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -184,12 +185,15 @@ public class Main {
             Expr expr = parseSSATree(tree, ctx);
             printAssert(expr);
         });
+        System.out.println("(check-sat)");
 
         ctx.close();
     }
 
     private static void printAssert(Expr smt2) {
-        System.out.println("(assert " + smt2 + ")");
+        if (smt2 != null) {
+            System.out.println("(assert " + smt2 + ")");
+        }
     }
 
     private static Expr parseSSATree(Tree<String> tree, Context ctx) {
@@ -205,11 +209,21 @@ public class Main {
         // else parse it's leaves
         switch (tree.getData().toLowerCase()) {
             case "assert":
-                return parseSSATree(tree.getLeft(), ctx);
+                System.out.println("(push)");
+                BoolExpr boolExpr = ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
+                        ctx.mkNot((BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
+                printAssert(boolExpr);
+                System.out.println("(pop)");
+                return null;
             case "==":
             case "=":
                 return ctx.mkEq(parseSSATree(tree.getLeft(), ctx),
                         parseSSATree(tree.getRight(), ctx));
+            case "!=":
+                return ctx.mkNot(ctx.mkEq(parseSSATree(tree.getLeft(), ctx),
+                        parseSSATree(tree.getRight(), ctx)));
+            case "!":
+                return ctx.mkNot((BoolExpr) parseSSATree(tree.getLeft(), ctx));
             case "?":
                 return ctx.mkITE((BoolExpr) parseSSATree(tree.getLeft(), ctx),
                         parseSSATree(tree.getRight().getLeft(), ctx),
