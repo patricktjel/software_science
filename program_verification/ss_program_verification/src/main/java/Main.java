@@ -158,6 +158,7 @@ public class Main {
         disjunction.addLeftNode(new Tree<>(ifPath));
         disjunction.addRightNode(new Tree<>(elsePath));
         endIf.print(0);
+        lines.add(endIf);
         vars.put("c_" + path, "Bool");
     }
 
@@ -206,7 +207,6 @@ public class Main {
             Expr expr = parseSSATree(tree, ctx);
             printAssert(expr);
         });
-        System.out.println("(check-sat)");
 
         ctx.close();
     }
@@ -234,6 +234,7 @@ public class Main {
                 BoolExpr boolExpr = ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
                         ctx.mkNot((BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
                 printAssert(boolExpr);
+                System.out.println("(check-sat)");
                 System.out.println("(pop)");
                 return null;
             case "==":
