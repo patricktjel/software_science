@@ -5,12 +5,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.stmt.AssertStmt;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.stmt.*;
 import com.microsoft.z3.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +28,7 @@ public class Main {
      * Parsing based on https://tomassetti.me/parsing-in-java/#javaLibraries
      */
     public static void main(String[] args) throws IOException {
-        CompilationUnit compilationUnit = JavaParser.parseResource("Example.java");
+        CompilationUnit compilationUnit = JavaParser.parseResource(args[0]);
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
         for (Parameter parameter : method.getParameters()) {
             vars.put(parameter.getNameAsString(), parameter.getTypeAsString());
@@ -58,9 +55,50 @@ public class Main {
                 parseITE((IfStmt) child);
             } else if (child instanceof AssertStmt) {
                 parseAssert((AssertStmt) child);
+            } else if (child instanceof WhileStmt) {
+                parseWhile((WhileStmt) child);
             }
         }
         parseToZ3();
+    }
+
+    /**
+     * Parse a statement in the form of 'while ...'
+     * @param node The node containingthe while statement
+     */
+    private static void parseWhile(WhileStmt node) {
+        // invariant & condition should hold
+        {
+            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
+            Expression parsed_inv = JavaParser.parseExpression(inv);
+            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
+            Tree<String> tree = new Tree<>("assertinv");
+            tree.addLeftNode(new Tree<>("&&"));
+            tree.getLeft().addLeftNode(invariant);
+            tree.getLeft().addRightNode(condition);
+            System.out.println("(assertinv (" + parsed_inv + " && " + node.getCondition() + "))");
+            tree.print(0);
+            lines.add(tree);
+        }
+        // the body
+        {
+            Node expr = node.getChildNodes().get(1).getChildNodes().get(0);
+            Tree<String> body = parseExpression(expr);
+            System.out.println(expr.getChildNodes().get(0));
+            body.print(0);
+            lines.add(body);
+        }
+        //afterwards the invariant should still hold
+        {
+            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
+            Expression parsed_inv = JavaParser.parseExpression(inv);
+            Tree<String> invariant = new Tree<>("assertinv");
+            invariant.addLeftNode(parseBinExpression((BinaryExpr) parsed_inv));
+            System.out.println("(assertinv (" + parsed_inv + ") )");
+            invariant.print(0);
+            lines.add(invariant);
+        }
     }
 
     /**
@@ -196,7 +234,6 @@ public class Main {
         return root;
     }
 
-
     private static void parseToZ3 () {
         Context ctx = new Context();
 
@@ -249,6 +286,26 @@ public class Main {
                 System.out.println("(check-sat)");
                 System.out.println("(pop)");
                 return null;
+            case "assertinv":
+                System.out.println("(push)");
+                BoolExpr expr = ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
+                        (BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
+                printAssert(expr);
+                System.out.println("(check-sat)");
+                System.out.println("(pop)");
+                return null;
+            case "<=":
+                return ctx.mkLe((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
+            case "<":
+                return ctx.mkLt((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
+            case ">=":
+                return ctx.mkGe((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
+            case ">":
+                return ctx.mkGt((ArithExpr) parseSSATree(tree.getLeft(), ctx),
+                        (ArithExpr) parseSSATree(tree.getRight(), ctx));
             case "==":
             case "=":
                 return ctx.mkEq(parseSSATree(tree.getLeft(), ctx),

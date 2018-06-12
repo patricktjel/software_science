@@ -8,6 +8,6 @@ public class Example {
             int n4 = n3 * 2;
         }
         assert n4 % 2 == 0;
-        return n4;
+        return i;
     }
 }
