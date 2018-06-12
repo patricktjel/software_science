@@ -158,7 +158,7 @@ public class Main {
      * @param node the node containing the ite statement
      */
     private static void parseITE(IfStmt node) {
-        // If statements
+        // If condition
         String ifPath = "c_" + (path + 1);
         String elsePath = "c_" + (path + 2);
         String oldPath = "c_" + path;
@@ -177,19 +177,19 @@ public class Main {
 
 
         Tree<String> iteTree = parseBinExpression(con);
-        //tree.addLeftNode();
-        //If body
+
 
         and.addRightNode(iteTree);
         tree.print(0);
         lines.add(tree);
-        tree.print(0);
-        path++;
-        Tree<String> expTree = parseExpression((node).getThenStmt().getChildNodes().get(0));
-        tree.print(0);
-        lines.add(expTree);
-        //Else statement
 
+        path++;
+
+        //If body
+        Tree<String> expTree = parseExpression((node).getThenStmt().getChildNodes().get(0));
+        lines.add(expTree);
+
+        //Else condition
         Tree<String> elseTree = new Tree<>("=");
         elseTree.addLeftNode(new Tree<>(elsePath));
 
@@ -207,10 +207,11 @@ public class Main {
 
         //Only print an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
-           Tree expr = parseExpression((node).getElseStmt().get().getChildNodes().get(0));
+           Tree<String> expr = parseExpression((node).getElseStmt().get().getChildNodes().get(0));
            lines.add(expr);
         }
 
+        //End-if tree
         path++;
         Tree<String> endIf = new Tree<>("=");
         endIf.addLeftNode(new Tree<>("c_" + path));
