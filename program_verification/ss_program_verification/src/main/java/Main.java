@@ -75,26 +75,21 @@ public class Main {
      * @param node The node containingthe while statement
      */
     private static void parseWhile(WhileStmt node) {
-
-        // the line before a while is always a precondition.
-        {
-            Tree<String> pre_condition = lines.remove(lines.size() - 1);
-            lines.add(new Tree<>("push"));
-            lines.add(pre_condition);
-        }
-
         // invariant & condition should hold
         {
             String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
             Expression parsed_inv = JavaParser.parseExpression(inv);
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
+
             Tree<String> tree = new Tree<>("assertinv");
             tree.addLeftNode(new Tree<>("&&"));
             tree.getLeft().addLeftNode(invariant);
             tree.getLeft().addRightNode(condition);
             System.out.println("(assertinv (" + parsed_inv + " && " + node.getCondition() + "))");
             tree.print(0);
+
+            lines.add(new Tree<>("push"));
             lines.add(tree);
             lines.add(new Tree<>("check-sat"));
             lines.add(new Tree<>("pop"));
@@ -113,22 +108,42 @@ public class Main {
         }
         // the body
         {
+            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
+            Expression parsed_inv = JavaParser.parseExpression(inv);
+            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
+
+            // check condition and assert on old value.
+            Tree<String> tree = new Tree<>("&&");
+            tree.addLeftNode(invariant);
+            tree.addRightNode(condition);
+            tree.replace("i", "i_1");
+            vars.put("i_1", "int");
+            lines.add(tree);
+
             Node expr = node.getChildNodes().get(1).getChildNodes().get(0);
             Tree<String> body = parseExpression(expr);
+            body.getLeft().replace("i", "i_2");
+            body.getRight().replace("i", "i_1");
             System.out.println(expr.getChildNodes().get(0));
             body.print(0);
+            vars.put("i_2", "int");
             lines.add(body);
         }
         //afterwards the invariant should still hold
         {
-            lines.add(new Tree<>("push"));
             String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
             Expression parsed_inv = JavaParser.parseExpression(inv);
-            Tree<String> invariant = new Tree<>("assertinv");
-            invariant.addLeftNode(parseBinExpression((BinaryExpr) parsed_inv));
+            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+
+            Tree<String> tree = new Tree<>("assertinv");
+            tree.addLeftNode(invariant);
+            tree.replace("i", "i_2");
             System.out.println("(assertinv (" + parsed_inv + ") )");
+
+            lines.add(new Tree<>("push"));
             invariant.print(0);
-            lines.add(invariant);
+            lines.add(tree);
             lines.add(new Tree<>("check-sat"));
             lines.add(new Tree<>("pop"));
         }

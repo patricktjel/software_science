@@ -6,7 +6,6 @@ public class Example {
 //            i >= 0 && i <= 3
             int i = i + 1;
         }
-        assert i == 5;
         return i;
     }
 }

@@ -33,6 +33,18 @@ public class Tree<T> {
         this.right = toAdd;
     }
 
+    public void replace(T oldValue, T newValue) {
+        if (this.data.equals(oldValue)) {
+            this.data = newValue;
+        }
+        if (left != null) {
+            this.left.replace(oldValue, newValue);
+        }
+        if (right != null) {
+            this.right.replace(oldValue, newValue);
+        }
+    }
+
     public void print(int depth) {
 
         for (int i = 0; i < depth; i++) {
