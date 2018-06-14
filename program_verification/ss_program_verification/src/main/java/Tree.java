@@ -59,4 +59,13 @@ public class Tree<T> {
             right.print(depth + 1);
         }
     }
+
+    public static void print(Tree<String> s) {
+        if (s == null) {
+            return;
+        }
+        print(s.left);
+        System.out.print(s.getData() + " ");
+        print(s.right);
+    }
 }

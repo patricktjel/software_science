@@ -45,7 +45,11 @@ public class Main {
         BlockStmt code = (BlockStmt) method.getChildNodes().get(method.getChildNodes().size() - 1);
 
         parseMethodToSSA(code);
+        printSSA();
+        parseToZ3();
     }
+
+
 
     /**
      * Parses the content of a method
@@ -58,7 +62,6 @@ public class Main {
         for (Node child : node.getChildNodes()) {
             if (child instanceof ExpressionStmt) {
                 Tree<String> tree = parseExpression(child);
-                tree.print(0);
                 lines.add(tree);
             } else if (child instanceof IfStmt) {
                 parseITE((IfStmt) child);
@@ -68,7 +71,6 @@ public class Main {
                 parseWhile((WhileStmt) child);
             }
         }
-        parseToZ3();
     }
 
     /**
@@ -88,7 +90,6 @@ public class Main {
             tree.getLeft().addLeftNode(invariant);
             tree.getLeft().addRightNode(condition);
             System.out.println("(assertinv (" + parsed_inv + " && " + node.getCondition() + "))");
-            tree.print(0);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
@@ -127,7 +128,7 @@ public class Main {
             body.getLeft().replace("i", "i_2");
             body.getRight().replace("i", "i_1");
             System.out.println(expr.getChildNodes().get(0));
-            body.print(0);
+
             vars.put("i_2", "int");
             lines.add(body);
         }
@@ -143,7 +144,6 @@ public class Main {
             System.out.println("(assertinv (" + parsed_inv + ") )");
 
             lines.add(new Tree<>("push"));
-            invariant.print(0);
             lines.add(tree);
             lines.add(new Tree<>("check-sat"));
             lines.add(new Tree<>("pop"));
@@ -158,10 +158,9 @@ public class Main {
         lines.add(new Tree<>("push"));
         Tree<String> a = new Tree<>("assert");
         Tree<String> and = new Tree<>("&&");
-        a.addLeftNode(and);
+        a.addRightNode(and);
         and.addLeftNode(new Tree<>("c_" + path));
         and.addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
-        a.print(0);
         lines.add(a);
         lines.add(new Tree<>("check-sat"));
         lines.add(new Tree<>("pop"));
@@ -224,7 +223,6 @@ public class Main {
 
 
         and.addRightNode(iteTree);
-        tree.print(0);
         lines.add(tree);
 
         path++;
@@ -242,10 +240,9 @@ public class Main {
 
         Tree<String> negation = new Tree<>("!");
         conjunction.addRightNode(negation);
-        negation.addLeftNode(new Tree<>(ifPath));
+        negation.addRightNode(new Tree<>(ifPath));
 
         lines.add(elseTree);
-        elseTree.print(0);
         path++;
 
         //Only print an if body if the if body is present
@@ -261,7 +258,6 @@ public class Main {
         endIf.addRightNode(disjunction);
         disjunction.addLeftNode(new Tree<>(ifPath));
         disjunction.addRightNode(new Tree<>(elsePath));
-        endIf.print(0);
         lines.add(endIf);
         vars.put("c_" + path, "Bool");
     }
@@ -374,8 +370,8 @@ public class Main {
         // else parse it's leaves
         switch (tree.getData().toLowerCase()) {
             case "assert":
-                return ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
-                        ctx.mkNot((BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
+                return ctx.mkAnd((BoolExpr) parseSSATree(tree.getRight().getLeft(), ctx),
+                        ctx.mkNot((BoolExpr) parseSSATree(tree.getRight().getRight(), ctx)));
             case "assertinv":
                 return ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
                         (BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
@@ -402,7 +398,7 @@ public class Main {
                 return ctx.mkNot(ctx.mkEq((Expr)parseSSATree(tree.getLeft(), ctx),
                         (Expr)parseSSATree(tree.getRight(), ctx)));
             case "!":
-                return ctx.mkNot((BoolExpr) parseSSATree(tree.getLeft(), ctx));
+                return ctx.mkNot((BoolExpr) parseSSATree(tree.getRight(), ctx));
             case "?":
                 return ctx.mkITE((BoolExpr) parseSSATree(tree.getLeft(), ctx),
                         (Expr)parseSSATree(tree.getRight().getLeft(), ctx),
@@ -429,4 +425,21 @@ public class Main {
                 return null;
         }
     }
+
+    /**
+     * print all trees in as SSA
+     */
+    private static void printSSA() {
+        System.out.println("------- SSA ---------");
+        for (Tree<String> line : lines) {
+            if (!(line.getData().equals("push") || line.getData().equals("pop") || line.getData().equals("check-sat"))) {
+                Tree.print(line);
+                System.out.println();
+            }
+        }
+        System.out.println("------- END SSA ---------");
+    }
+
+
+
 }
