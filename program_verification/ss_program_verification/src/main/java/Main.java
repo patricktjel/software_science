@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Main {
@@ -229,8 +230,7 @@ public class Main {
         path++;
 
         //If body
-        Tree<String> expTree = parseExpression((node).getThenStmt().getChildNodes().get(0));
-        lines.add(expTree);
+        parseBody(node.getThenStmt().getChildNodes());
 
         //Else condition
         Tree<String> elseTree = new Tree<>("=");
@@ -250,8 +250,7 @@ public class Main {
 
         //Only print an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
-           Tree<String> expr = parseExpression((node).getElseStmt().get().getChildNodes().get(0));
-           lines.add(expr);
+            parseBody(node.getElseStmt().get().getChildNodes());
         }
 
         //End-if tree
@@ -288,6 +287,17 @@ public class Main {
             root.addRightNode(new Tree<>(node.getRight().toString()));
         }
         return root;
+    }
+
+    /**
+     * Parses the body of an if/else/while statement
+     * @return
+     */
+    private static void parseBody(List<Node> nodes) {
+        for (Node node : nodes) {
+            Tree<String> expTree = parseExpression(node);
+            lines.add(expTree);
+        }
     }
 
     /**
