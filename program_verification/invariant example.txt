@@ -1,0 +1,37 @@
+Descreases not needed if loops is known to terminate 
+Things that change within the loop need new variabls
+Function 
+	A
+	-> Q holds
+	while (b)
+		invariant Q, decreases f(x) 
+		{
+			-> Assume b ^ Q with new variables
+			L
+			-> Q Holds, f(x) > f(x')
+		}
+	}
+	-> Assume Q and not b
+	
+	//rest of code
+	
+-----
+function 
+	A
+	-> Q
+	F
+	-> Q ^ not b
+	x
+	
+	Requires Q
+	ensures Q ^ not b
+	Decreases x
+F(x): function
+	if (b) 
+		-> assume b ^Q
+		L
+		check Q and x decreases (f(y) < f(x))
+		F(x)
+	else
+
+	

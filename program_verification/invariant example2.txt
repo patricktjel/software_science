@@ -1,0 +1,12 @@
+i=0
+while i < 5 { inv 0 =< 5 (decreases 5-i)
+	i++
+}
+
+i0 = 0
+(push) (! 0 =< i0 =< 5) (pop)
+0 =< i1 =< 5 ^ i1 <5
+i2 = i1 + 1
+(push) (!(0=<i2=<i5) (pop)
+(push) !(5-i1 > 5-i2) (pop)
+0=<i3=<5 ^ !(i < 5)
