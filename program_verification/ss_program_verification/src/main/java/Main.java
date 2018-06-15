@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class Main {
 
     private static final String PATH_LETTER = "c";
-    private static Map<String, Variable> varss = new HashMap<>();
+    private static Map<String, Variable> vars = new HashMap<>();
 
     private static final ArrayList<Tree<String>> lines = new ArrayList<>();
     private static Map<String, Expr> z3Vars = new HashMap<>();
@@ -35,7 +35,7 @@ public class Main {
         // parse the file
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
         for (Parameter parameter : method.getParameters()) {
-            varss.put(parameter.getNameAsString(), new Variable(parameter.getNameAsString(), parameter.getTypeAsString()));
+            vars.put(parameter.getNameAsString(), new Variable(parameter.getNameAsString(), parameter.getTypeAsString()));
         }
         BlockStmt code = (BlockStmt) method.getChildNodes().get(method.getChildNodes().size() - 1);
 
@@ -51,7 +51,7 @@ public class Main {
      */
     private static void parseMethodToSSA(Node node) {
         //Set up initial Path variables
-        varss.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
+        vars.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
         for (Node child : node.getChildNodes()) {
             if (child instanceof ExpressionStmt) {
                 Tree<String> tree = parseExpression(child);
@@ -94,16 +94,16 @@ public class Main {
         // create a new path variable
         {
             Tree<String> condition_path = new Tree<>("=");
-            condition_path.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getNext()));
+            condition_path.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
             Tree<String> and = new Tree<>("&&");
-            and.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getPrevious()));
+            and.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
             and.addRightNode(parseBinExpression((BinaryExpr) node.getCondition()));
             condition_path.addRightNode(and);
             lines.add(condition_path);
         }
         // the body
         {
-            varss.get(modifies).getNext();
+            vars.get(modifies).getNext();
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
@@ -129,7 +129,7 @@ public class Main {
         }
         //After the loop is complete the invariant still holds, and the loop condition does not hold anymore
         {
-            varss.get(modifies).getNext();
+            vars.get(modifies).getNext();
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
             Tree<String> after = new Tree<>("&&");
@@ -153,7 +153,7 @@ public class Main {
         Tree<String> a = new Tree<>("assert");
         Tree<String> and = new Tree<>("&&");
         a.addRightNode(and);
-        and.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getCurrent()));
+        and.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
         and.addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
         lines.add(a);
         lines.add(new Tree<>("check-sat"));
@@ -170,16 +170,16 @@ public class Main {
         String name = decl.getNameAsString();
 
         // if the variable is declared in this line create the variable and add it to the list
-        boolean variableExists = varss.containsKey(name);
+        boolean variableExists = vars.containsKey(name);
         if (!variableExists) {
-            varss.put(name, new Variable(name, decl.getTypeAsString()));
+            vars.put(name, new Variable(name, decl.getTypeAsString()));
         }
 
         Tree<String> tree = new Tree<>("=");
 
         Tree<String> op = new Tree<>("?");
         tree.addRightNode(op);
-        op.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getCurrent()));
+        op.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
 
         Tree<String> thenElse = new Tree<>(":");
         op.addRightNode(thenElse);
@@ -192,11 +192,11 @@ public class Main {
 
         // the variable isn't introduced in this instance of this method so we need the next instance of the variable.
         if (variableExists) {
-            varss.get(name).getNext();
+            vars.get(name).getNext();
         }
 
-        tree.addLeftNode(new Tree<>(varss.get(name).getCurrent()));
-        thenElse.addRightNode(new Tree<>(varss.get(name).getPrevious()));
+        tree.addLeftNode(new Tree<>(vars.get(name).getCurrent()));
+        thenElse.addRightNode(new Tree<>(vars.get(name).getPrevious()));
         return tree;
     }
 
@@ -204,8 +204,8 @@ public class Main {
      * Creates trees for ITE statements (one tree for the if, one for every line in the body, one for the else,
      *          one for every line in the else body, one for every modified variable and one for the close of the if)
      * This method will save the state of the variables which will be modified at the beginning of the if statement.
-     * After the if body is executed it will save the state of these variables again in the variable ifState and the varss get a reset till the beginning state of the if statement.
-     * After the else body is executed the same will happen, the variables will be saved in the variable elseState and the varss get a reset.
+     * After the if body is executed it will save the state of these variables again in the variable ifState and the vars get a reset till the beginning state of the if statement.
+     * After the else body is executed the same will happen, the variables will be saved in the variable elseState and the vars get a reset.
      *
      * To be able to use the variables again outside the if statement another line gets added.
      * In which the next SSA value of the variable get's the value of the ifState if the if statement was executed (according to the path condition)
@@ -216,16 +216,16 @@ public class Main {
      */
     private static void parseITE(IfStmt node) {
         // If condition
-        String oldPath = varss.get(PATH_LETTER).getCurrent();
-        String ifPath = varss.get(PATH_LETTER).getNext();
-        String elsePath = varss.get(PATH_LETTER).getNext();
+        String oldPath = vars.get(PATH_LETTER).getCurrent();
+        String ifPath = vars.get(PATH_LETTER).getNext();
+        String elsePath = vars.get(PATH_LETTER).getNext();
 
         List<Integer> current = new ArrayList<>();
         List<String> modifies = new ArrayList<>();
         if (node.getComment().isPresent()) {
             modifies = Arrays.stream(node.getComment().get().getContent().split(";"))
                     .map(String::trim).collect(Collectors.toList());
-            current = modifies.stream().map(s -> varss.get(s).getVariables().size() - 1).collect(Collectors.toList());
+            current = modifies.stream().map(s -> vars.get(s).getVariables().size() - 1).collect(Collectors.toList());
         }
         BinaryExpr con = (BinaryExpr) node.getCondition();
         // if condition path value
@@ -273,7 +273,7 @@ public class Main {
             List<Integer> elseState = getVarsStateAndReset(modifies, current);
 
             for (int i = 0; i < ifState.size(); i++) {
-                Variable var = varss.get(modifies.get(i));
+                Variable var = vars.get(modifies.get(i));
                 int ifVal = ifState.get(i);
                 int elseVal = elseState.get(i);
                 if (ifState.get(i) > elseState.get(i)) {
@@ -285,7 +285,7 @@ public class Main {
                 // determine which value is set during the ITE
                 Tree<String> setValue = new Tree<>("=");
                 Tree<String> pathCon = new Tree<>("?");
-                pathCon.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getPrevious()));
+                pathCon.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
                 setValue.addRightNode(pathCon);
 
                 Tree<String> ifElseTree = new Tree<>(":");
@@ -302,7 +302,7 @@ public class Main {
         //End-if tree path condition
         {
             Tree<String> endIf = new Tree<>("=");
-            endIf.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getNext()));
+            endIf.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
             Tree<String> disjunction = new Tree<>("||");
             endIf.addRightNode(disjunction);
             disjunction.addLeftNode(new Tree<>(ifPath));
@@ -312,9 +312,9 @@ public class Main {
     }
 
     public static List<Integer> getVarsStateAndReset(List<String> modifies, List<Integer> current) {
-        List<Integer> collect = modifies.stream().map(s -> varss.get(s).getVariables().size() - 1).collect(Collectors.toList());
+        List<Integer> collect = modifies.stream().map(s -> vars.get(s).getVariables().size() - 1).collect(Collectors.toList());
         for (int i = 0; i < modifies.size(); i++) {
-            varss.get(modifies.get(i)).resetTo(current.get(i));
+            vars.get(modifies.get(i)).resetTo(current.get(i));
         }
         return collect;
     }
@@ -333,7 +333,7 @@ public class Main {
             if (node.getLeft() instanceof IntegerLiteralExpr) {
                 root.addLeftNode(new Tree<>(node.getLeft().toString()));
             } else {
-                root.addLeftNode(new Tree<>(varss.get(node.getLeft().toString()).getCurrent()));
+                root.addLeftNode(new Tree<>(vars.get(node.getLeft().toString()).getCurrent()));
             }
         }
 
@@ -344,7 +344,7 @@ public class Main {
             if (node.getRight() instanceof IntegerLiteralExpr) {
                 root.addRightNode(new Tree<>(node.getRight().toString()));
             } else {
-                root.addRightNode(new Tree<>(varss.get(node.getRight().toString()).getCurrent()));
+                root.addRightNode(new Tree<>(vars.get(node.getRight().toString()).getCurrent()));
             }
         }
         return root;
@@ -368,7 +368,7 @@ public class Main {
         Context ctx = new Context();
 
         // first declare all (path)variables
-        varss.forEach((k,v) -> {
+        vars.forEach((k, v) -> {
             v.getVariables().forEach(s -> {
                 Expr expr = null;
 
