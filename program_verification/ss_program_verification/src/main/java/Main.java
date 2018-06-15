@@ -11,7 +11,6 @@ import com.github.javaparser.ast.stmt.*;
 import com.microsoft.z3.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,12 +19,9 @@ public class Main {
 
     private static final String PATH_LETTER = "c";
     private static Map<String, Variable> varss = new HashMap<>();
-    private static Map<String, String> vars = new HashMap<>();
-    private static int path = 0;
+
     private static final ArrayList<Tree<String>> lines = new ArrayList<>();
-
     private static Map<String, Expr> z3Vars = new HashMap<>();
-
 
     /**
      * The first method gets parsed.
@@ -35,7 +31,6 @@ public class Main {
     public static void main(String[] args) throws IOException {
         File file = new File(args[0]);
         CompilationUnit compilationUnit = JavaParser.parse(file);
-        FileInputStream in = new FileInputStream(args[0]);
 
         // parse the file
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
@@ -118,10 +113,7 @@ public class Main {
             tree.addRightNode(condition);
             lines.add(tree);
 
-            Node expr = node.getChildNodes().get(1).getChildNodes().get(0);
-            Tree<String> body = parseExpression(expr);
-            System.out.println(expr.getChildNodes().get(0));
-            lines.add(body);
+            parseBody(node.getChildNodes().get(1).getChildNodes());
         }
         //afterwards the invariant should still hold
         {
@@ -147,7 +139,7 @@ public class Main {
         Tree<String> a = new Tree<>("assert");
         Tree<String> and = new Tree<>("&&");
         a.addRightNode(and);
-        and.addLeftNode(new Tree<>("c_" + path));
+        and.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getCurrent()));
         and.addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
         lines.add(a);
         lines.add(new Tree<>("check-sat"));
