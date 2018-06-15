@@ -139,7 +139,6 @@ public class Main {
             negation.addRightNode(condition);
             after.addRightNode(negation);
 
-            after.printDebug(0);
             lines.add(after);
         }
     }
