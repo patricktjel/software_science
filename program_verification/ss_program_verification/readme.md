@@ -27,7 +27,6 @@ Lastly, can you run the jar using the provided instructions?
 It's Java code with a few additions/limitations;
   * Only the first method of a class file is parsed.
   * For every assignment you have to add it's type, so `i = 0`is not allowed, instead you should use `int i = 0`
-  * If/then/while bodies can only have a single line of code.
   * There is support for the following binary operators:
   ```
   <=, <, >=, >, +, -, =, ==, !=, &&, ||, %, *
@@ -38,14 +37,27 @@ It's Java code with a few additions/limitations;
   ```
   * There is support for a while loop in the format of our second example:
   ```
-          while (i < 5) {
-  //            i >= 0 && i <= 5; i
-              int i = i + 1;
-          }
+  while (i < 5) {
+  //     i >= 0 && i <= 5; i
+        int i = i + 1;
+  }
   ```
-  * In which `i < 5` is our condition. the comment `i >=0 && i <= 5` is our invariant
-  and `int i = i + 1` is our body. Note that the first line of the while body should be a comment stating an invariant of the loop and the variables that change. 
-  * There only support for terminating loops (e.g. there is no 'decreases')
+  * In which `i < 5` is our condition. the comment `i >=0 && i <= 5` is our invariant, `;i` indicates that the 
+  variable `i`is changing in this loop and `int i = i + 1` is our body. Note that the first line of the while body
+   should be a comment stating an invariant of the loop and the variables that change. 
+  * There's only support for terminating loops (e.g. there is no 'decreases')
+  ```
+  int n = n1 + n2 + n10;
+  // n
+  if (n % 2 == 0) {
+      int n = n * 3;
+  } else {
+      int n = n * 2;
+  }
+  ```
+  * If you want to use a variable again after an if statement you have to declare the variable, `n` in the example above,
+  before the if statement. And if you want to use the variable inside the if statement you have to place a comment directly 
+  above the if statement which indicates which variables are modified inside the ITE. This can be a `;` seperated list.
   * Language features not mentioned in this readme are not supported.
   
 ## Installing Java bindings
