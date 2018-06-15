@@ -1,3 +1,4 @@
+//Example 1 without SSA java
 public class Example {
 
     public void mul_to_even(int n1, int n2, int n10) {

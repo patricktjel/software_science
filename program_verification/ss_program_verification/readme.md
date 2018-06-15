@@ -1,6 +1,6 @@
 #Readme.md
 Who: Lars Meijer(s2021749) and Patrick Thijssen(s2009609)  
-How to run: our jar is packaged with 3 examples. You can run those enxamples on Windows with the following commands;  
+How to run: our jar is packaged with a few examples. You can run those enxamples on Windows with the following commands;  
 ```Shell
 java -jar ss-program-verification.jar Example_1.jar
 java -jar ss-program-verification.jar Example_2.jar
@@ -53,7 +53,7 @@ Clone the z3 git repository.
 Follow the instructions to install using make but **when running `python scripts/mk_make.py` add --java**, 
 the instructions are located at https://github.com/Z3Prover/z3#building-z3-using-make-and-gccclang  
 
-Next locate the file libz3java.so (it is probably located in /usr/lib) and enter the folder path (so /path/to/lib and not /path/to/lib/libz3java.so)
+Next locate the file libz3java.so (On mac: libz3java.dylib ) (it is probably located in /usr/lib) and enter the folder path (so /path/to/lib and not /path/to/lib/libz3java.so)
  instead of /path/to/lib in the java command to run.
 
 

@@ -121,12 +121,26 @@ public class Main {
 
             Tree<String> tree = new Tree<>("assertinv");
             tree.addLeftNode(invariant);
-            System.out.println("(assertinv (" + parsed_inv + ") )");
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
             lines.add(new Tree<>("check-sat"));
             lines.add(new Tree<>("pop"));
+        }
+        //After the loop is complete the invariant still holds, and the loop condition does not hold anymore
+        {
+            varss.get(modifies).getNext();
+            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
+            Tree<String> after = new Tree<>("&&");
+            after.addLeftNode(invariant);
+
+            Tree<String> negation = new Tree<>("!");
+            negation.addRightNode(condition);
+            after.addRightNode(negation);
+
+            after.printDebug(0);
+            lines.add(after);
         }
     }
 
