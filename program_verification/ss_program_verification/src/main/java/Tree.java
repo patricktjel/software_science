@@ -21,7 +21,7 @@ public class Tree<T> {
 
     public void addLeftNode(Tree<T> toAdd) {
         if (left != null) {
-            throw new RuntimeException("Tree already has a right node");
+            throw new RuntimeException("Tree already has a left node");
         }
         this.left = toAdd;
     }

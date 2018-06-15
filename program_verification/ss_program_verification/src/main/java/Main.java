@@ -13,10 +13,8 @@ import com.microsoft.z3.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -207,8 +205,11 @@ public class Main {
         String ifPath = varss.get(PATH_LETTER).getNext();
         String elsePath = varss.get(PATH_LETTER).getNext();
 
-        BinaryExpr con = (BinaryExpr) node.getCondition();
+        List<String> modifies = Arrays.stream(node.getComment().get().getContent().split(","))
+                .map(String::trim).collect(Collectors.toList());
+        List<Integer> current = modifies.stream().map(s -> varss.get(s).getVariables().size() - 1).collect(Collectors.toList());
 
+        BinaryExpr con = (BinaryExpr) node.getCondition();
         // if condition path value
         {
             Tree<String> tree = new Tree<>("=");
@@ -237,14 +238,47 @@ public class Main {
 
             Tree<String> negation = new Tree<>("!");
             conjunction.addRightNode(negation);
-            negation.addLeftNode(new Tree<>(ifPath));
+            negation.addRightNode(new Tree<>(ifPath));
 
             lines.add(elseTree);
         }
 
         //Only print an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
+            // save the state of the vars of the if state before resetting everything.
+            List<Integer> ifState = getVarsStateAndReset(modifies, current);
+
+            // parse the else body
             parseBody(node.getElseStmt().get().getChildNodes());
+
+            // save the state of the vars of the else state
+            List<Integer> elseState = getVarsStateAndReset(modifies, current);
+
+            for (int i = 0; i < ifState.size(); i++) {
+                Variable var = varss.get(modifies.get(i));
+                int ifVal = ifState.get(i);
+                int elseVal = elseState.get(i);
+                if (ifState.get(i) > elseState.get(i)) {
+                    var.createTill(ifVal);
+                } else {
+                    var.createTill(elseVal);
+                }
+
+                // determine which value is set during the ITE
+                Tree<String> setValue = new Tree<>("=");
+                Tree<String> pathCon = new Tree<>("?");
+                pathCon.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getPrevious()));
+                setValue.addRightNode(pathCon);
+
+                Tree<String> ifElseTree = new Tree<>(":");
+                pathCon.addRightNode(ifElseTree);
+
+                ifElseTree.addLeftNode(new Tree<>(var.getVariables().get(ifVal)));
+                ifElseTree.addRightNode(new Tree<>(var.getVariables().get(elseVal)));
+
+                setValue.addLeftNode(new Tree<>(var.getNext()));
+                lines.add(setValue);
+            }
         }
 
         //End-if tree path condition
@@ -257,6 +291,14 @@ public class Main {
             disjunction.addRightNode(new Tree<>(elsePath));
             lines.add(endIf);
         }
+    }
+
+    public static List<Integer> getVarsStateAndReset(List<String> modifies, List<Integer> current) {
+        List<Integer> collect = modifies.stream().map(s -> varss.get(s).getVariables().size() - 1).collect(Collectors.toList());
+        for (int i = 0; i < modifies.size(); i++) {
+            varss.get(modifies.get(i)).resetTo(current.get(i));
+        }
+        return collect;
     }
 
     /**
