@@ -27,11 +27,10 @@ Lastly, can you run the jar using the provided instructions?
 It's Java code with a few additions/limitations;
   * Only the first method of a class file is parsed.
   * For every assignment you have to add it's type, so `i = 0`is not allowed, instead you should use `int i = 0`
-  * The code has to be in Static Single Assignment format. Except in loops, there the body and assingment has to use a variable called i.
   * If/then/while bodies can only have a single line of code.
   * There is support for the following binary operators:
   ```
-  <=, <, >=, >, +, -, =, ==, !=, &&, ||, %, *, ? :
+  <=, <, >=, >, +, -, =, ==, !=, &&, ||, %, *
   ```
   * There is support for the following unary operators:
   ```
@@ -40,12 +39,12 @@ It's Java code with a few additions/limitations;
   * There is support for a while loop in the format of our second example:
   ```
           while (i < 5) {
-  //            i >= 0 && i <= 5
+  //            i >= 0 && i <= 5; i
               int i = i + 1;
           }
   ```
   * In which `i < 5` is our condition. the comment `i >=0 && i <= 5` is our invariant
-  and `int i = i + 1` is our body. Note that the first line of the while body should be a comment stating an invariant of the loop. 
+  and `int i = i + 1` is our body. Note that the first line of the while body should be a comment stating an invariant of the loop and the variables that change. 
   * There only support for terminating loops (e.g. there is no 'decreases')
   * Language features not mentioned in this readme are not supported.
   

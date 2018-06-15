@@ -6,7 +6,7 @@ public class Example {
         int n4 = 0;
         int n5 = 0;
         int n5 = 2;
-        //n4, n5
+        //n4; n5
         if (n3 % 2 == 0) {
             int n4 = n3 * 3;
             int n5 = n4 * 2;
