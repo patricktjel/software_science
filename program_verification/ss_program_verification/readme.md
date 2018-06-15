@@ -3,10 +3,8 @@ Who: Lars Meijer(s2021749) and Patrick Thijssen(s2009609)
 How to run: our jar is packaged with a few examples. You can run those enxamples on Windows with the following commands;  
 ```Shell
 java -jar ss-program-verification.jar Example_1.jar
-java -jar ss-program-verification.jar Example_2.jar
-java -jar ss-program-verification.jar Example_3.jar
 ```
-On Linux: (See also instructions below) **replace /path/to/lib**
+On Linux and Mac: (*See also instructions below*) **replace /path/to/lib**
 ```Shell
 java -Djava.library.path=/path/to/lib -jar ss-program-verification.jar Example_1.java
 ```
@@ -19,9 +17,8 @@ The source code (Java maven project) can be found in ss_program_verification_sou
 ##What to do
 Run the program using the commands above (and instructions below)  
 ##What to inspect/questions
-Wether our output is right, and especially of the output for (basic) loops is correct.  
-We would also like to know how complex the programs that  we have to be able to handle can be, right now there are still some serious limitations.  
-Lastly, can you run the jar using the provided instructions?  
+Whether our output is right, and especially of the output for (basic) loops (Example 2 and 3) is correct.  
+Whether our SSA strategy for ITE blocks is correct (Example_4, Example_6) and DocBlock on line 203-216 of main.java
 
 ##What do we support
 It's Java code with a few additions/limitations;
@@ -57,7 +54,7 @@ It's Java code with a few additions/limitations;
   ```
   * If you want to use a variable again after an if statement you have to declare the variable, `n` in the example above,
   before the if statement. And if you want to use the variable inside the if statement you have to place a comment directly 
-  above the if statement which indicates which variables are modified inside the ITE. This can be a `;` seperated list.
+  above the if statement which indicates which variables are modified inside the ITE. This can be a `;` separated list.
   * Language features not mentioned in this readme are not supported.
   
 ## Installing Java bindings
