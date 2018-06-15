@@ -38,7 +38,6 @@ public class Main {
         FileInputStream in = new FileInputStream(args[0]);
 
         // parse the file
-        CompilationUnit cu = JavaParser.parse(in);
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
         for (Parameter parameter : method.getParameters()) {
             varss.put(parameter.getNameAsString(), new Variable(parameter.getNameAsString(), parameter.getTypeAsString()));
@@ -55,7 +54,7 @@ public class Main {
      *
      * @param node the node containing the method
      */
-    static void parseMethodToSSA(Node node) {
+    private static void parseMethodToSSA(Node node) {
         //Set up initial Path variables
         varss.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
         for (Node child : node.getChildNodes()) {
@@ -205,10 +204,13 @@ public class Main {
         String ifPath = varss.get(PATH_LETTER).getNext();
         String elsePath = varss.get(PATH_LETTER).getNext();
 
-        List<String> modifies = Arrays.stream(node.getComment().get().getContent().split(","))
-                .map(String::trim).collect(Collectors.toList());
-        List<Integer> current = modifies.stream().map(s -> varss.get(s).getVariables().size() - 1).collect(Collectors.toList());
-
+        List<Integer> current = new ArrayList<>();
+        List<String> modifies = new ArrayList<>();
+        if (node.getComment().isPresent()) {
+            modifies = Arrays.stream(node.getComment().get().getContent().split(","))
+                    .map(String::trim).collect(Collectors.toList());
+            current = modifies.stream().map(s -> varss.get(s).getVariables().size() - 1).collect(Collectors.toList());
+        }
         BinaryExpr con = (BinaryExpr) node.getCondition();
         // if condition path value
         {
