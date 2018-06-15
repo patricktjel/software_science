@@ -1,3 +1,9 @@
+/**
+ * This tree represents SSA code (in order)
+ * each line of SSA code should have its own tree
+ *
+ * @param <T> Generic type of the tree
+ */
 public class Tree<T> {
     private T data;
     private Tree<T> left;
@@ -19,33 +25,33 @@ public class Tree<T> {
         return right;
     }
 
+    /**
+     * Adds a left node to this tree
+     * @param toAdd the tree to add
+     */
     public void addLeftNode(Tree<T> toAdd) {
         if (left != null) {
-            throw new RuntimeException("Tree already has a left node");
+            throw new IllegalArgumentException("Tree already has a left node");
         }
         this.left = toAdd;
     }
 
+    /**
+     * Adds a right node to this tree
+     * @param toAdd the tree to add
+     */
     public void addRightNode(Tree<T> toAdd) {
         if (right != null) {
-            throw new RuntimeException("Tree already has a right node");
+            throw new IllegalArgumentException("Tree already has a right node");
         }
         this.right = toAdd;
     }
 
-    public void replace(T oldValue, T newValue) {
-        if (this.data.equals(oldValue)) {
-            this.data = newValue;
-        }
-        if (left != null) {
-            this.left.replace(oldValue, newValue);
-        }
-        if (right != null) {
-            this.right.replace(oldValue, newValue);
-        }
-    }
-
-    public void print(int depth) {
+    /**
+     * Prints a visual representation of the tree for debug purposes
+     * @param depth the depth (number of tabs)
+     */
+    public void printDebug(int depth) {
 
         for (int i = 0; i < depth; i++) {
             System.out.print("\t");
@@ -53,19 +59,23 @@ public class Tree<T> {
         System.out.println(data);
 
         if (left != null) {
-            left.print(depth + 1);
+            left.printDebug(depth + 1);
         }
         if (right != null) {
-            right.print(depth + 1);
+            right.printDebug(depth + 1);
         }
     }
 
-    public static void print(Tree<String> s) {
+    /**
+     * Prints the tree in order (in oder to generate SSA code from the tree
+     * @param s self node to print
+     */
+    public static void printInOrder(Tree<String> s) {
         if (s == null) {
             return;
         }
-        print(s.left);
+        printInOrder(s.left);
         System.out.print(s.getData() + " ");
-        print(s.right);
+        printInOrder(s.right);
     }
 }

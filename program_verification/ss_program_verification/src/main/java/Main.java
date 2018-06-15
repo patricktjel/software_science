@@ -247,7 +247,7 @@ public class Main {
             lines.add(elseTree);
         }
 
-        //Only print an if body if the if body is present
+        //Only printInOrder an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
             // save the state of the vars of the if state before resetting everything.
             List<Integer> ifState = getVarsStateAndReset(modifies, current);
@@ -484,13 +484,13 @@ public class Main {
     }
 
     /**
-     * print all trees in as SSA
+     * printInOrder all trees in as SSA
      */
     private static void printSSA() {
         System.out.println("------- SSA ---------");
         for (Tree<String> line : lines) {
             if (!(line.getData().equals("push") || line.getData().equals("pop") || line.getData().equals("check-sat"))) {
-                Tree.print(line);
+                Tree.printInOrder(line);
                 System.out.println();
             }
         }

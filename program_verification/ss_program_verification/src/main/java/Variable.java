@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class to administrate what number is given to variables, eg the first occurrence of n will become n_0, the next will be n_1
+ */
 public class Variable {
     private final String type;
     private final String name;
@@ -43,16 +46,8 @@ public class Variable {
         return type;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public List<String> getVariables() {
         return variables;
-    }
-
-    public List<String> copyVariables() {
-        return new ArrayList<>(variables);
     }
 
     /**
@@ -71,6 +66,10 @@ public class Variable {
         }
     }
 
+    /**
+     * Creates a variable up to and including till
+     * @param till the number
+     */
     public void createTill(int till) {
         if (till < variables.size()) {
             return;
