@@ -199,7 +199,7 @@ public class Main {
         List<Integer> current = new ArrayList<>();
         List<String> modifies = new ArrayList<>();
         if (node.getComment().isPresent()) {
-            modifies = Arrays.stream(node.getComment().get().getContent().split(","))
+            modifies = Arrays.stream(node.getComment().get().getContent().split(";"))
                     .map(String::trim).collect(Collectors.toList());
             current = modifies.stream().map(s -> varss.get(s).getVariables().size() - 1).collect(Collectors.toList());
         }
