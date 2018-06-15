@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.microsoft.z3.*;
 
@@ -18,6 +19,8 @@ import java.util.Map;
 
 public class Main {
 
+    private static final String PATH_LETTER = "c";
+    private static Map<String, Variable> varss = new HashMap<>();
     private static Map<String, String> vars = new HashMap<>();
     private static int path = 0;
     private static final ArrayList<Tree<String>> lines = new ArrayList<>();
@@ -39,7 +42,7 @@ public class Main {
         CompilationUnit cu = JavaParser.parse(in);
         MethodDeclaration method = (MethodDeclaration) compilationUnit.getChildNodes().get(0).getChildNodes().get(1);
         for (Parameter parameter : method.getParameters()) {
-            vars.put(parameter.getNameAsString(), parameter.getTypeAsString());
+            varss.put(parameter.getNameAsString(), new Variable(parameter.getNameAsString(), parameter.getTypeAsString()));
         }
         BlockStmt code = (BlockStmt) method.getChildNodes().get(method.getChildNodes().size() - 1);
 
@@ -53,7 +56,7 @@ public class Main {
      */
     static void parseMethodToSSA(Node node) {
         //Set up initial Path variables
-        vars.put("c_0", "Bool");
+        varss.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
         for (Node child : node.getChildNodes()) {
             if (child instanceof ExpressionStmt) {
                 Tree<String> tree = parseExpression(child);
@@ -75,10 +78,12 @@ public class Main {
      * @param node The node containingthe while statement
      */
     private static void parseWhile(WhileStmt node) {
+        String[] comment = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent().split(";");
+        String modifies = comment[1].trim();
+        Expression parsed_inv = JavaParser.parseExpression(comment[0]);
+
         // invariant & condition should hold
         {
-            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
-            Expression parsed_inv = JavaParser.parseExpression(inv);
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
@@ -96,20 +101,17 @@ public class Main {
         }
         // create a new path variable
         {
-            path++;
-            vars.put("c_"+path, "bool");
             Tree<String> condition_path = new Tree<>("=");
-            condition_path.addLeftNode(new Tree<>("c_" + path));
+            condition_path.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getNext()));
             Tree<String> and = new Tree<>("&&");
-            and.addLeftNode(new Tree<>("c_" + (path - 1)));
+            and.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getPrevious()));
             and.addRightNode(parseBinExpression((BinaryExpr) node.getCondition()));
             condition_path.addRightNode(and);
             lines.add(condition_path);
         }
         // the body
         {
-            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
-            Expression parsed_inv = JavaParser.parseExpression(inv);
+            varss.get(modifies).getNext();
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
@@ -117,28 +119,20 @@ public class Main {
             Tree<String> tree = new Tree<>("&&");
             tree.addLeftNode(invariant);
             tree.addRightNode(condition);
-            tree.replace("i", "i_1");
-            vars.put("i_1", "int");
             lines.add(tree);
 
             Node expr = node.getChildNodes().get(1).getChildNodes().get(0);
             Tree<String> body = parseExpression(expr);
-            body.getLeft().replace("i", "i_2");
-            body.getRight().replace("i", "i_1");
             System.out.println(expr.getChildNodes().get(0));
             body.print(0);
-            vars.put("i_2", "int");
             lines.add(body);
         }
         //afterwards the invariant should still hold
         {
-            String inv = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent();
-            Expression parsed_inv = JavaParser.parseExpression(inv);
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
 
             Tree<String> tree = new Tree<>("assertinv");
             tree.addLeftNode(invariant);
-            tree.replace("i", "i_2");
             System.out.println("(assertinv (" + parsed_inv + ") )");
 
             lines.add(new Tree<>("push"));
@@ -174,25 +168,35 @@ public class Main {
         //Expression Check if the path condition holds,
         VariableDeclarator decl = (VariableDeclarator) node.getChildNodes().get(0).getChildNodes().get(0);
         String name = decl.getNameAsString();
-        String pathName = "c_" + path;
-        vars.put(name, decl.getTypeAsString());
+
+        // if the variable is declared in this line create the variable and add it to the list
+        boolean variableExists = varss.containsKey(name);
+        if (!variableExists) {
+            varss.put(name, new Variable(name, decl.getTypeAsString()));
+        }
 
         Tree<String> tree = new Tree<>("=");
-        tree.addLeftNode(new Tree<>(name));
 
         Tree<String> op = new Tree<>("?");
         tree.addRightNode(op);
-        op.addLeftNode(new Tree<>(pathName));
+        op.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getCurrent()));
 
         Tree<String> thenElse = new Tree<>(":");
         op.addRightNode(thenElse);
-        thenElse.addRightNode(new Tree<>(name));
+
         if (decl.getInitializer().get() instanceof BinaryExpr) {
             thenElse.addLeftNode(parseBinExpression((BinaryExpr) decl.getInitializer().get()));
         } else {
             thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
         }
 
+        // the variable isn't introduced in this instance of this method so we need the next instance of the variable.
+        if (variableExists) {
+            varss.get(name).getNext();
+        }
+
+        tree.addLeftNode(new Tree<>(varss.get(name).getCurrent()));
+        thenElse.addRightNode(new Tree<>(varss.get(name).getPrevious()));
         return tree;
     }
 
@@ -202,51 +206,47 @@ public class Main {
      */
     private static void parseITE(IfStmt node) {
         // If condition
-        String ifPath = "c_" + (path + 1);
-        String elsePath = "c_" + (path + 2);
-        String oldPath = "c_" + path;
-        vars.put(ifPath, "Bool");
-        vars.put(elsePath, "Bool");
-
+        String oldPath = varss.get(PATH_LETTER).getCurrent();
+        String ifPath = varss.get(PATH_LETTER).getNext();
+        String elsePath = varss.get(PATH_LETTER).getNext();
 
         BinaryExpr con = (BinaryExpr) node.getCondition();
 
-        //Build a tree
-        Tree<String> tree = new Tree<>("=");
-        tree.addLeftNode(new Tree<>(ifPath));
-        Tree<String> and = new Tree<>("&&");
-        tree.addRightNode(and);
-        and.addLeftNode(new Tree<>(oldPath));
-
-
-        Tree<String> iteTree = parseBinExpression(con);
-
-
-        and.addRightNode(iteTree);
-        tree.print(0);
-        lines.add(tree);
-
-        path++;
+        // if condition path value
+        {
+            Tree<String> tree = new Tree<>("=");
+            tree.addLeftNode(new Tree<>(ifPath));
+            Tree<String> and = new Tree<>("&&");
+            tree.addRightNode(and);
+            and.addLeftNode(new Tree<>(oldPath));
+            Tree<String> iteTree = parseBinExpression(con);
+            and.addRightNode(iteTree);
+            tree.print(0);
+            lines.add(tree);
+        }
 
         //If body
-        Tree<String> expTree = parseExpression((node).getThenStmt().getChildNodes().get(0));
-        lines.add(expTree);
+        {
+            Tree<String> expTree = parseExpression((node).getThenStmt().getChildNodes().get(0));
+            lines.add(expTree);
+        }
 
-        //Else condition
-        Tree<String> elseTree = new Tree<>("=");
-        elseTree.addLeftNode(new Tree<>(elsePath));
+        //Else condition path value
+        {
+            Tree<String> elseTree = new Tree<>("=");
+            elseTree.addLeftNode(new Tree<>(elsePath));
 
-        Tree<String> conjunction = new Tree<>("&&");
-        elseTree.addRightNode(conjunction);
-        conjunction.addLeftNode(new Tree<>(oldPath));
+            Tree<String> conjunction = new Tree<>("&&");
+            elseTree.addRightNode(conjunction);
+            conjunction.addLeftNode(new Tree<>(oldPath));
 
-        Tree<String> negation = new Tree<>("!");
-        conjunction.addRightNode(negation);
-        negation.addLeftNode(new Tree<>(ifPath));
+            Tree<String> negation = new Tree<>("!");
+            conjunction.addRightNode(negation);
+            negation.addLeftNode(new Tree<>(ifPath));
 
-        lines.add(elseTree);
-        elseTree.print(0);
-        path++;
+            lines.add(elseTree);
+            elseTree.print(0);
+        }
 
         //Only print an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
@@ -254,17 +254,17 @@ public class Main {
            lines.add(expr);
         }
 
-        //End-if tree
-        path++;
-        Tree<String> endIf = new Tree<>("=");
-        endIf.addLeftNode(new Tree<>("c_" + path));
-        Tree<String> disjunction = new Tree<>("||");
-        endIf.addRightNode(disjunction);
-        disjunction.addLeftNode(new Tree<>(ifPath));
-        disjunction.addRightNode(new Tree<>(elsePath));
-        endIf.print(0);
-        lines.add(endIf);
-        vars.put("c_" + path, "Bool");
+        //End-if tree path condition
+        {
+            Tree<String> endIf = new Tree<>("=");
+            endIf.addLeftNode(new Tree<>(varss.get(PATH_LETTER).getNext()));
+            Tree<String> disjunction = new Tree<>("||");
+            endIf.addRightNode(disjunction);
+            disjunction.addLeftNode(new Tree<>(ifPath));
+            disjunction.addRightNode(new Tree<>(elsePath));
+            endIf.print(0);
+            lines.add(endIf);
+        }
     }
 
     /**
@@ -278,14 +278,23 @@ public class Main {
         if (node.getLeft() instanceof BinaryExpr) {
             root.addLeftNode(parseBinExpression((BinaryExpr) node.getLeft()));
         } else {
-            root.addLeftNode(new Tree<>(node.getLeft().toString()));
+            if (node.getLeft() instanceof IntegerLiteralExpr) {
+                root.addLeftNode(new Tree<>(node.getLeft().toString()));
+            } else {
+                root.addLeftNode(new Tree<>(varss.get(node.getLeft().toString()).getCurrent()));
+            }
         }
 
         //Check right node
         if (node.getRight() instanceof BinaryExpr) {
             root.addRightNode(parseBinExpression((BinaryExpr) node.getRight()));
         } else {
-            root.addRightNode(new Tree<>(node.getRight().toString()));
+
+            if (node.getRight() instanceof IntegerLiteralExpr) {
+                root.addRightNode(new Tree<>(node.getRight().toString()));
+            } else {
+                root.addRightNode(new Tree<>(varss.get(node.getRight().toString()).getCurrent()));
+            }
         }
         return root;
     }
@@ -297,15 +306,21 @@ public class Main {
         Context ctx = new Context();
 
         // first declare all (path)variables
-        vars.forEach((k, v) -> {
-            Expr expr = null;
-            if (v.toLowerCase().equals("int")) {
-                expr = ctx.mkIntConst(k);
-            } else if (v.toLowerCase().equals("bool")) {
-                expr = ctx.mkBoolConst(k);
-            }
-            System.out.println(expr.getFuncDecl());
-            z3Vars.put(k, expr);
+        varss.forEach((k,v) -> {
+            v.getVariables().forEach(s -> {
+                Expr expr = null;
+
+                switch (v.getType().toLowerCase()){
+                    case "int":
+                        expr = ctx.mkIntConst(s);
+                        break;
+                    case "bool":
+                        expr = ctx.mkBoolConst(s);
+                }
+
+                System.out.println(expr.getFuncDecl());
+                z3Vars.put(s, expr);
+            });
         });
 
         // set default path condition value
