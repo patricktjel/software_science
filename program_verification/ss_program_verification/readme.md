@@ -1,8 +1,8 @@
 #Readme.md
 Who: Lars Meijer(s2021749) and Patrick Thijssen(s2009609)  
-How to run: our jar is packaged with a few examples. You can run those enxamples on Windows with the following commands;  
+How to run: our jar is packaged with a few examples. You can run those examples on Windows with the following commands;  
 ```Shell
-java -jar ss-program-verification.jar Example_1.jar
+java -jar ss-program-verification.jar Example_1.java
 ```
 On Linux and Mac: (*See also instructions below*) **replace /path/to/lib**
 ```Shell
