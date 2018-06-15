@@ -9,9 +9,8 @@ java -jar ss-program-verification.jar Example_2.jar
   * The second example is with a while loop which counts to five.  
   * Another option is to run our program with your own file.
  
-The source code (Java maven project) can be found in ss_program_verification_source.rar, the most important file is the main.java file.  
-What to do: Run the program using the commands above_ 
-What to inspect: if our output is right (specially in the while case).  
+What to do: see the file Main.java  
+What to inspect: if our output is right.
 
 ##What do we support
 It's Java code with a few additions/limitations;
