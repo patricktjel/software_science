@@ -203,7 +203,7 @@ public class Main {
         if (decl.getInitializer().get() instanceof BinaryExpr) {
             thenElse.addLeftNode(parseBinExpression((BinaryExpr) decl.getInitializer().get()));
         } else {
-            thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
+            thenElse.addLeftNode(new Tree<>(vars.get(decl.getInitializer().get().toString()).getCurrent()));
         }
 
         // the variable isn't introduced in this instance of this method so we need the next instance of the variable.
