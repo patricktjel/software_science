@@ -75,16 +75,13 @@ public class Main {
         String modifies = comment[1].trim();
         Expression parsed_inv = JavaParser.parseExpression(comment[0]);
 
-        // invariant & condition should hold
+        // invariant should hold
         {
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
-            Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
             Tree<String> tree = new Tree<>("assertinv");
-            tree.addLeftNode(new Tree<>("&&"));
-            tree.getLeft().addLeftNode(invariant);
-            tree.getLeft().addRightNode(condition);
-            System.out.println("(assertinv (" + parsed_inv + " && " + node.getCondition() + "))");
+            tree.addLeftNode(invariant);
+            System.out.println("(assertinv (" + parsed_inv + "))");
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
