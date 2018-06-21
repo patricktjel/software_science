@@ -203,7 +203,12 @@ public class Main {
         if (decl.getInitializer().get() instanceof BinaryExpr) {
             thenElse.addLeftNode(parseBinExpression((BinaryExpr) decl.getInitializer().get()));
         } else {
-            thenElse.addLeftNode(new Tree<>(vars.get(decl.getInitializer().get().toString()).getCurrent()));
+            Variable var = vars.get(decl.getInitializer().get().toString());
+            if (var != null) {
+                thenElse.addLeftNode(new Tree<>(vars.get(decl.getInitializer().get().toString()).getCurrent()));
+            } else {
+                thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
+            }
         }
 
         // the variable isn't introduced in this instance of this method so we need the next instance of the variable.
@@ -238,11 +243,7 @@ public class Main {
 
         List<Integer> current = new ArrayList<>();
         List<String> modifies = new ArrayList<>();
-        if (node.getComment().isPresent()) {
-            modifies = Arrays.stream(node.getComment().get().getContent().split(";"))
-                    .map(String::trim).collect(Collectors.toList());
-            current = modifies.stream().map(s -> vars.get(s).getVariables().size() - 1).collect(Collectors.toList());
-        }
+
         BinaryExpr con = (BinaryExpr) node.getCondition();
         // if condition path value
         {
@@ -258,7 +259,8 @@ public class Main {
 
         //If body
         {
-            parseBody(node.getThenStmt().getChildNodes());
+            List<Tree<String>> added = parseBody(node.getThenStmt().getChildNodes());
+            modifiesList(current, modifies, added);
         }
 
         //Else condition path value
@@ -282,7 +284,8 @@ public class Main {
         //Only printInOrder an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
             // parse the else body
-            parseBody(node.getElseStmt().get().getChildNodes());
+            List<Tree<String>> added = parseBody(node.getElseStmt().get().getChildNodes());
+            modifiesList(current, modifies, added);
         }
         // save the state of the vars of the else state
         List<Integer> elseState = getVarsStateAndReset(modifies, current);
@@ -323,6 +326,17 @@ public class Main {
 
                 setValue.addLeftNode(new Tree<>(var.getNext()));
                 lines.add(setValue);
+            }
+        }
+    }
+
+    private static void modifiesList(List<Integer> current, List<String> modifies, List<Tree<String>> added) {
+        for (Tree<String> tree : added) {
+            if (tree.getData().equals("=")) {
+                String varname = truncateUnderscore(tree.getLeft().getData());
+                if (modifies.add(varname)) {
+                    current.add(vars.get(varname).getPreviousInt());
+                }
             }
         }
     }
@@ -370,11 +384,14 @@ public class Main {
      * Parses the body of an if/else/while statement
      * @return
      */
-    private static void parseBody(List<Node> nodes) {
+    private static List<Tree<String>> parseBody(List<Node> nodes) {
+        List<Tree<String>> added = new ArrayList<>();
         for (Node node : nodes) {
             Tree<String> expTree = parseExpression(node);
             lines.add(expTree);
+            added.add(expTree);
         }
+        return added;
     }
 
     /**
@@ -528,5 +545,14 @@ public class Main {
     }
 
 
+    private static String truncateUnderscore(String input) {
+        String[] split = input.split("_");
+        StringBuilder res = new StringBuilder();
+        for (int i = 0; i < split.length-1; i++) {
+            res.append("_").append(split[i]);
+        }
+        res.deleteCharAt(0);
+        return res.toString();
+    }
 
 }

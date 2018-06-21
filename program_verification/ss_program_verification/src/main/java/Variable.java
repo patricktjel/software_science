@@ -42,6 +42,14 @@ public class Variable {
         }
     }
 
+    /**
+     * Gets the previous index
+     * @return the previous index
+     */
+    public int getPreviousInt() {
+        return (variables.size() == 1) ? 0 : variables.size() - 2;
+    }
+
     public String getType() {
         return type;
     }
