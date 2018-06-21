@@ -81,10 +81,8 @@ public class Main {
         {
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
 
-            Tree<String> tree = new Tree<>("=>");
-            tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
-            tree.addRightNode(new Tree<>("assertinv"));
-            tree.getRight().addRightNode(invariant);
+            Tree<String> tree = new Tree<>("assertinv");
+            tree.addRightNode(invariant);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
