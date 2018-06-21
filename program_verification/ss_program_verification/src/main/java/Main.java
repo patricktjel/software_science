@@ -182,7 +182,7 @@ public class Main {
         {
             vars.get(modifies).getNext();
 
-            Tree<String> tree = new Tree<>("&&");
+            Tree<String> tree = new Tree<>("=>");
             tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
 
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
