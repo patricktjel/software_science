@@ -12,3 +12,5 @@ public class Example {
         int y = tmp;
     }
 }
+
+// expected result: just runnable

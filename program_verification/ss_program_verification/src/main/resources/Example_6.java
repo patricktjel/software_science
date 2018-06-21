@@ -15,4 +15,4 @@ public class Example {
     }
 }
 
-// expected result:
+// expected result: sat

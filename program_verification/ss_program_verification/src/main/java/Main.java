@@ -318,16 +318,20 @@ public class Main {
             lines.add(elseTree);
         }
 
-        // save the state of the vars of the if state before resetting everything.
-        List<Integer> ifState = getVarsStateAndReset(modifies, current);
+        List<Integer> ifState = new ArrayList<>();
+        List<Integer> elseState = new ArrayList<>();
         //Only printInOrder an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
+            // save the state of the vars of the if state before resetting everything.
+            ifState = getVarsStateAndReset(modifies, current);
+
             // parse the else body
             List<Tree<String>> added = parseBody(node.getElseStmt().get().getChildNodes());
             modifiesList(current, modifies, added);
+
+            // save the state of the vars of the else state
+            elseState = getVarsStateAndReset(modifies, current);
         }
-        // save the state of the vars of the else state
-        List<Integer> elseState = getVarsStateAndReset(modifies, current);
 
         //End-if tree path condition
         {
@@ -341,11 +345,18 @@ public class Main {
         }
 
         if (node.getElseStmt().isPresent()) {
-            for (int i = 0; i < ifState.size(); i++) {
+            for (int i = 0; i < elseState.size(); i++) {
                 Variable var = vars.get(modifies.get(i));
-                int ifVal = ifState.get(i);
+
+                int ifVal;
+                if (i >= ifState.size()) {
+                    ifVal = current.get(i);
+                } else {
+                    ifVal = ifState.get(i);
+                }
                 int elseVal = elseState.get(i);
-                if (ifState.get(i) > elseState.get(i)) {
+
+                if (ifVal > elseVal) {
                     var.createTill(ifVal);
                 } else {
                     var.createTill(elseVal);

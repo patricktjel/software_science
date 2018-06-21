@@ -18,6 +18,10 @@ public class Variable {
         variables.add(name + "_0");
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String getNext() {
         String next = name + "_" + variables.size();
         variables.add(next);
