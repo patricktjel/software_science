@@ -172,7 +172,7 @@ public class Main {
         // create a new path variable for after the while
         {
             // the variable is always the same as the variable before the while loop.
-            Tree<String> condition_path = new Tree<>("=");
+            Tree<String> condition_path = new Tree<>("=>");
             condition_path.addRightNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
             condition_path.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
 
