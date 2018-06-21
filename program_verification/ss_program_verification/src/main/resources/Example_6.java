@@ -15,4 +15,4 @@ public class Example {
     }
 }
 
-// expected result: sat
+// expected result: sat (unsat if n5 % 2 == 0)

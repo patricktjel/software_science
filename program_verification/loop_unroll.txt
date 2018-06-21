@@ -1,0 +1,17 @@
+A
+if b
+	L
+	while b
+		L
+endif
+
+---
+A
+if b
+	L
+	if b
+		L
+		while b
+			L
+	endif
+endif
