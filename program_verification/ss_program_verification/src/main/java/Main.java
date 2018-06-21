@@ -384,7 +384,8 @@ public class Main {
         for (Tree<String> tree : added) {
             if (tree.getData().equals("=")) {
                 String varname = truncateUnderscore(tree.getLeft().getData());
-                if (modifies.add(varname)) {
+                if (!modifies.contains(varname)) {
+                    modifies.add(varname);
                     current.add(vars.get(varname).getPreviousInt());
                 }
             }
