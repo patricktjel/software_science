@@ -118,7 +118,7 @@ public class Main {
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
             // check condition and assert on old value.
-            Tree<String> tree = new Tree<>("&&");
+            Tree<String> tree = new Tree<>("=>");
             tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
             tree.addRightNode(new Tree<>("&&"));
             tree.getRight().addLeftNode(invariant);
@@ -126,15 +126,6 @@ public class Main {
             lines.add(tree);
 
             parseBody(node.getChildNodes().get(1).getChildNodes());
-        }
-        // create a new path variable for after the while
-        {
-            // the variable is always the same as the variable before the while loop.
-            Tree<String> condition_path = new Tree<>("=");
-            condition_path.addRightNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
-            condition_path.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
-
-            lines.add(condition_path);
         }
         //afterwards the invariant should still hold
         {
@@ -162,7 +153,7 @@ public class Main {
                 decreases_right = new Tree<>(vars.get(val).getCurrent());
             }
 
-            Tree<String> tree = new Tree<>("assertinv");
+            Tree<String> tree = new Tree<>("assert");
             tree.addRightNode(new Tree<>("&&"));
             tree.getRight().addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
 
@@ -176,6 +167,15 @@ public class Main {
             lines.add(tree);
             lines.add(new Tree<>("check-sat"));
             lines.add(new Tree<>("pop"));
+        }
+        // create a new path variable for after the while
+        {
+            // the variable is always the same as the variable before the while loop.
+            Tree<String> condition_path = new Tree<>("=");
+            condition_path.addRightNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
+            condition_path.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
+
+            lines.add(condition_path);
         }
         //After the loop is complete the invariant still holds, and the loop condition does not hold anymore
         {
