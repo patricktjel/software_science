@@ -15,4 +15,4 @@ public class Example {
     }
 }
 
-// expected result: sat (n5 does not exist outside of the scope)
+// expected result: unsat
