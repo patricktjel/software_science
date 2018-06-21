@@ -277,17 +277,28 @@ public class Main {
             lines.add(elseTree);
         }
 
+        // save the state of the vars of the if state before resetting everything.
+        List<Integer> ifState = getVarsStateAndReset(modifies, current);
         //Only printInOrder an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
-            // save the state of the vars of the if state before resetting everything.
-            List<Integer> ifState = getVarsStateAndReset(modifies, current);
-
             // parse the else body
             parseBody(node.getElseStmt().get().getChildNodes());
+        }
+        // save the state of the vars of the else state
+        List<Integer> elseState = getVarsStateAndReset(modifies, current);
 
-            // save the state of the vars of the else state
-            List<Integer> elseState = getVarsStateAndReset(modifies, current);
+        //End-if tree path condition
+        {
+            Tree<String> endIf = new Tree<>("=");
+            endIf.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
+            Tree<String> disjunction = new Tree<>("||");
+            endIf.addRightNode(disjunction);
+            disjunction.addLeftNode(new Tree<>(ifPath));
+            disjunction.addRightNode(new Tree<>(elsePath));
+            lines.add(endIf);
+        }
 
+        if (node.getElseStmt().isPresent()) {
             for (int i = 0; i < ifState.size(); i++) {
                 Variable var = vars.get(modifies.get(i));
                 int ifVal = ifState.get(i);
@@ -313,17 +324,6 @@ public class Main {
                 setValue.addLeftNode(new Tree<>(var.getNext()));
                 lines.add(setValue);
             }
-        }
-
-        //End-if tree path condition
-        {
-            Tree<String> endIf = new Tree<>("=");
-            endIf.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
-            Tree<String> disjunction = new Tree<>("||");
-            endIf.addRightNode(disjunction);
-            disjunction.addLeftNode(new Tree<>(ifPath));
-            disjunction.addRightNode(new Tree<>(elsePath));
-            lines.add(endIf);
         }
     }
 
