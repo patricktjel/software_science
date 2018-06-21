@@ -129,7 +129,7 @@ public class Main {
         }
         //afterwards the invariant should still hold
         {
-            Tree<String> tree = new Tree<>("&&");
+            Tree<String> tree = new Tree<>("=>");
             tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
 
             Tree<String> assertinv = new Tree<>("assertinv");
@@ -154,14 +154,15 @@ public class Main {
             }
 
             Tree<String> tree = new Tree<>("assert");
-            tree.addRightNode(new Tree<>("&&"));
+            tree.addRightNode(new Tree<>("=>"));
             tree.getRight().addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
 
             Tree<String> decreasesTree = new Tree<>(">");
             decreasesTree.addLeftNode(decreases_left);
             decreasesTree.addRightNode(decreases_right);
 
-            tree.getRight().addRightNode(decreasesTree);
+            tree.getRight().addRightNode(new Tree<>("!"));
+            tree.getRight().getRight().addRightNode(decreasesTree);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
@@ -526,6 +527,7 @@ public class Main {
         // else parse it's leaves
         switch (tree.getData().toLowerCase()) {
             case "assert":
+                return parseSSATree(tree.getRight(),ctx);
             case "assertinv":
                 return ctx.mkNot((BoolExpr) parseSSATree(tree.getRight(), ctx));
             case "=>":
