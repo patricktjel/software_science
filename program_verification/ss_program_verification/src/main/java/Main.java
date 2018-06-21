@@ -526,6 +526,7 @@ public class Main {
         // else parse it's leaves
         switch (tree.getData().toLowerCase()) {
             case "assert":
+                return parseSSATree(tree.getRight(),ctx);
             case "assertinv":
                 return ctx.mkNot((BoolExpr) parseSSATree(tree.getRight(), ctx));
             case "=>":
