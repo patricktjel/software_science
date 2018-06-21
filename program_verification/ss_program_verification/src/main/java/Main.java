@@ -38,6 +38,18 @@ public class Main {
         for (Parameter parameter : method.getParameters()) {
             vars.put(parameter.getNameAsString(), new Variable(parameter.getNameAsString(), parameter.getTypeAsString()));
         }
+
+        //Set up initial Path variables
+        vars.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
+        Tree<String> tree = new Tree<>("=");
+        tree.addLeftNode(new Tree<>(vars.get("c").getCurrent()));
+        if (!method.getComment().isPresent()) {
+            tree.addRightNode(new Tree<>("true"));
+        } else {
+            Tree<String> requires = parseBinExpression(JavaParser.parseExpression(method.getComment().get().getContent()));
+            tree.addRightNode(requires);
+        }
+        lines.add(tree);
         BlockStmt code = (BlockStmt) method.getChildNodes().get(method.getChildNodes().size() - 1);
 
         parseMethodToSSA(code);
@@ -51,8 +63,6 @@ public class Main {
      * @param node the node containing the method
      */
     private static void parseMethodToSSA(Node node) {
-        //Set up initial Path variables
-        vars.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
         for (Node child : node.getChildNodes()) {
             if (child instanceof ExpressionStmt) {
                 Tree<String> tree = parseExpression(child);
@@ -470,9 +480,6 @@ public class Main {
                 z3Vars.put(s, expr);
             });
         });
-
-        // set default path condition value
-        printAssert(ctx.mkEq(z3Vars.get("c_0"), ctx.mkBool(true)));
 
         // create an assertion for every code line.
         lines.forEach(tree -> {

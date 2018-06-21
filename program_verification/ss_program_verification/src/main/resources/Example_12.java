@@ -1,7 +1,7 @@
-//Loop with correct invariant
+//These are the loops based on the examples given in class (i-- has been replaced by i = i - 1, -i is replaced by 0 - 1 to ease our parsing)
 public class Example {
 
-    // y >= 0
+    // y >= 0 (Required not process, need to manually add  (assert (= c_0 (y_0 > 0)))
     public void count_to_five(int y) {
         int x = 0;
         int i = y;
@@ -14,4 +14,4 @@ public class Example {
     }
 }
 
-// expected result:  unsatg unsat unsat unsat
+// expected result:  unsat unsat sat unsat

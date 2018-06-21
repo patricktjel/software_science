@@ -1,4 +1,4 @@
-//Loop with correct invariant
+//These are the loops based on the examples given in class (i-- has been replaced by i = i - 1, -i is replaced by 0 - 1 to ease our parsing)
 public class Example {
 
     // y >= 0 (Required not process, need to manually add  (assert (= c_0 (y_0 > 0)))
@@ -6,12 +6,12 @@ public class Example {
         int x = 0;
         int i = y;
         while (i > 0) {
-//           0 - i; i*2 + x == y*2 && i >= 0; i
+//          i; i*2 + x == y*2 && i >= 0; i
             int i = i - 1;
             int x = x + 2;
         }
-        assert x == 2 * y;
+        assert 0 - x == 2 * y;
     }
 }
 
-// expected result:  unsatg unsat unsat unsat
+// expected result:  unsat unsat unsat sat
