@@ -3,7 +3,7 @@ public class Example {
 
     public void swap(int x, int y) {
         int tmp = x;
-        //x; tmp
+
         if (tmp > y) {
             int x = y;
         } else {

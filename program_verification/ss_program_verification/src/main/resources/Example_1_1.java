@@ -3,7 +3,7 @@ public class Example {
 
     public void mul_to_even(int n1, int n2, int n10) {
         int n = n1 + n2 + n10;
-        // n
+
         if (n % 2 == 0) {
             int n = n * 3;
         } else {
