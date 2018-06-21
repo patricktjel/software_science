@@ -163,9 +163,14 @@ public class Main {
             }
 
             Tree<String> tree = new Tree<>("assertinv");
-            tree.addRightNode(new Tree<>(">"));
-            tree.getRight().addLeftNode(decreases_left);
-            tree.getRight().addRightNode(decreases_right);
+            tree.addRightNode(new Tree<>("&&"));
+            tree.getRight().addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
+
+            Tree<String> decreasesTree = new Tree<>(">");
+            decreasesTree.addLeftNode(decreases_left);
+            decreasesTree.addRightNode(decreases_right);
+
+            tree.getRight().addRightNode(decreasesTree);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
