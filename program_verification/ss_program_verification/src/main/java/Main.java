@@ -80,8 +80,7 @@ public class Main {
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
 
             Tree<String> tree = new Tree<>("assertinv");
-            tree.addLeftNode(invariant);
-            System.out.println("(assertinv (" + parsed_inv + "))");
+            tree.addRightNode(invariant);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
@@ -106,18 +105,33 @@ public class Main {
 
             // check condition and assert on old value.
             Tree<String> tree = new Tree<>("&&");
-            tree.addLeftNode(invariant);
-            tree.addRightNode(condition);
+            tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
+            tree.addRightNode(new Tree<>("&&"));
+            tree.getRight().addLeftNode(invariant);
+            tree.getRight().addRightNode(condition);
             lines.add(tree);
 
             parseBody(node.getChildNodes().get(1).getChildNodes());
         }
+        // create a new path variable for after the while
+        {
+            // the variable is always the same as the variable before the while loop.
+            Tree<String> condition_path = new Tree<>("=");
+            condition_path.addRightNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
+            condition_path.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
+
+            lines.add(condition_path);
+        }
         //afterwards the invariant should still hold
         {
-            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            Tree<String> tree = new Tree<>("&&");
+            tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
 
-            Tree<String> tree = new Tree<>("assertinv");
-            tree.addLeftNode(invariant);
+            Tree<String> assertinv = new Tree<>("assertinv");
+            Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            assertinv.addRightNode(invariant);
+
+            tree.addRightNode(assertinv);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
@@ -127,16 +141,22 @@ public class Main {
         //After the loop is complete the invariant still holds, and the loop condition does not hold anymore
         {
             vars.get(modifies).getNext();
+
+            Tree<String> tree = new Tree<>("&&");
+            tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
+
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
             Tree<String> after = new Tree<>("&&");
             after.addLeftNode(invariant);
 
+            tree.addRightNode(after);
+
             Tree<String> negation = new Tree<>("!");
             negation.addRightNode(condition);
             after.addRightNode(negation);
 
-            lines.add(after);
+            lines.add(tree);
         }
     }
 
@@ -440,8 +460,8 @@ public class Main {
                 return ctx.mkAnd((BoolExpr) parseSSATree(tree.getRight().getLeft(), ctx),
                         ctx.mkNot((BoolExpr) parseSSATree(tree.getRight().getRight(), ctx)));
             case "assertinv":
-                return ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
-                        (BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
+                return ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getRight().getLeft(), ctx),
+                        (BoolExpr) parseSSATree(tree.getRight().getRight(), ctx)));
             case "=>":
                 return ctx.mkImplies((BoolExpr) parseSSATree(tree.getLeft(), ctx),
                         (BoolExpr) parseSSATree(tree.getRight(), ctx));
