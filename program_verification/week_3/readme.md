@@ -6,7 +6,7 @@ java -jar ss-program-verification.jar Example_1.java
 ```
 On Linux and Mac: (*See also instructions below*) **replace /path/to/lib**
 ```Shell
-java -Djava.library.path=/path/to/lib -jar ss-program-verification.jar Example_1.java
+java -D java.library.path=/path/to/lib -jar ss-program-verification.jar Example_1.java
 ```
 
   * The first example is an example that always returns an even number. (Which is the same code as last week)
@@ -35,17 +35,13 @@ It's Java code with a few additions/limitations;
   * There is support for a while loop in the format of our second example:
   ```
   while (i < 5) {
-  //    i; i >= 0 && i <= 5; i
+  //     i >= 0 && i <= 5; i
         int i = i + 1;
   }
   ```
-  * In which `i < 5` is our condition. The comment consists of the following 3 parts:
-    * `i` which is our decreasing variable
-    * `i >= 0 && i <= 5` is our invariant
-    * `i` is also our variable which changes inside the loop
-    
-  Note that the first line of the while body should be a comment stating the decreases variable,
-  the invariant of the loop and the variables that change. 
+  * In which `i < 5` is our condition. the comment `i >=0 && i <= 5` is our invariant, `;i` indicates that the 
+  variable `i`is changing in this loop and `int i = i + 1` is our body. Note that the first line of the while body
+   should be a comment stating an invariant of the loop and the variables that change. 
   * There's only support for terminating loops (e.g. there is no 'decreases')
   ```
   int n = n1 + n2 + n10;

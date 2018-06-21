@@ -7,7 +7,6 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.microsoft.z3.*;
 
@@ -73,16 +72,19 @@ public class Main {
      */
     private static void parseWhile(WhileStmt node) {
         String[] comment = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent().split(";");
-        Expression decreases = JavaParser.parseExpression(comment[0]);
-        Expression parsed_inv = JavaParser.parseExpression(comment[1]);
-        String modifies = comment[2].trim();
+        String modifies = comment[1].trim();
+        Expression parsed_inv = JavaParser.parseExpression(comment[0]);
 
-        // invariant should hold
+        // invariant & condition should hold
         {
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
+            Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
             Tree<String> tree = new Tree<>("assertinv");
-            tree.addRightNode(invariant);
+            tree.addLeftNode(new Tree<>("&&"));
+            tree.getLeft().addLeftNode(invariant);
+            tree.getLeft().addRightNode(condition);
+            System.out.println("(assertinv (" + parsed_inv + " && " + node.getCondition() + "))");
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
@@ -99,73 +101,26 @@ public class Main {
             condition_path.addRightNode(and);
             lines.add(condition_path);
         }
-
-        // save the decreases value
-        Tree<String> decreases_left;
         // the body
         {
             vars.get(modifies).getNext();
-
-            // save the decreases value at the beginning of the loop body
-            if (decreases instanceof BinaryExpr) {
-                decreases_left = parseBinExpression((BinaryExpr) decreases);
-            } else {
-                String val = ((NameExpr) decreases).getName().toString();
-                decreases_left = new Tree<>(vars.get(val).getCurrent());
-            }
-
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
             // check condition and assert on old value.
             Tree<String> tree = new Tree<>("&&");
-            tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
-            tree.addRightNode(new Tree<>("&&"));
-            tree.getRight().addLeftNode(invariant);
-            tree.getRight().addRightNode(condition);
+            tree.addLeftNode(invariant);
+            tree.addRightNode(condition);
             lines.add(tree);
 
             parseBody(node.getChildNodes().get(1).getChildNodes());
         }
-        // create a new path variable for after the while
-        {
-            // the variable is always the same as the variable before the while loop.
-            Tree<String> condition_path = new Tree<>("=");
-            condition_path.addRightNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
-            condition_path.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
-
-            lines.add(condition_path);
-        }
         //afterwards the invariant should still hold
         {
-            Tree<String> tree = new Tree<>("&&");
-            tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
-
-            Tree<String> assertinv = new Tree<>("assertinv");
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
-            assertinv.addRightNode(invariant);
-
-            tree.addRightNode(assertinv);
-
-            lines.add(new Tree<>("push"));
-            lines.add(tree);
-            lines.add(new Tree<>("check-sat"));
-            lines.add(new Tree<>("pop"));
-        }
-        // decreases
-        {
-            Tree<String> decreases_right;
-            if (decreases instanceof BinaryExpr) {
-                decreases_right = parseBinExpression((BinaryExpr) decreases);
-            } else {
-                String val = ((NameExpr) decreases).getName().toString();
-                decreases_right = new Tree<>(vars.get(val).getCurrent());
-            }
 
             Tree<String> tree = new Tree<>("assertinv");
-            tree.addRightNode(new Tree<>(">"));
-            tree.getRight().addLeftNode(decreases_left);
-            tree.getRight().addRightNode(decreases_right);
+            tree.addLeftNode(invariant);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
@@ -175,22 +130,16 @@ public class Main {
         //After the loop is complete the invariant still holds, and the loop condition does not hold anymore
         {
             vars.get(modifies).getNext();
-
-            Tree<String> tree = new Tree<>("&&");
-            tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
-
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
             Tree<String> after = new Tree<>("&&");
             after.addLeftNode(invariant);
 
-            tree.addRightNode(after);
-
             Tree<String> negation = new Tree<>("!");
             negation.addRightNode(condition);
             after.addRightNode(negation);
 
-            lines.add(tree);
+            lines.add(after);
         }
     }
 
@@ -237,12 +186,7 @@ public class Main {
         if (decl.getInitializer().get() instanceof BinaryExpr) {
             thenElse.addLeftNode(parseBinExpression((BinaryExpr) decl.getInitializer().get()));
         } else {
-            Variable var = vars.get(decl.getInitializer().get().toString());
-            if (var != null) {
-                thenElse.addLeftNode(new Tree<>(vars.get(decl.getInitializer().get().toString()).getCurrent()));
-            } else {
-                thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
-            }
+            thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
         }
 
         // the variable isn't introduced in this instance of this method so we need the next instance of the variable.
@@ -277,7 +221,11 @@ public class Main {
 
         List<Integer> current = new ArrayList<>();
         List<String> modifies = new ArrayList<>();
-
+        if (node.getComment().isPresent()) {
+            modifies = Arrays.stream(node.getComment().get().getContent().split(";"))
+                    .map(String::trim).collect(Collectors.toList());
+            current = modifies.stream().map(s -> vars.get(s).getVariables().size() - 1).collect(Collectors.toList());
+        }
         BinaryExpr con = (BinaryExpr) node.getCondition();
         // if condition path value
         {
@@ -293,8 +241,7 @@ public class Main {
 
         //If body
         {
-            List<Tree<String>> added = parseBody(node.getThenStmt().getChildNodes());
-            modifiesList(current, modifies, added);
+            parseBody(node.getThenStmt().getChildNodes());
         }
 
         //Else condition path value
@@ -313,29 +260,17 @@ public class Main {
             lines.add(elseTree);
         }
 
-        // save the state of the vars of the if state before resetting everything.
-        List<Integer> ifState = getVarsStateAndReset(modifies, current);
         //Only printInOrder an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
+            // save the state of the vars of the if state before resetting everything.
+            List<Integer> ifState = getVarsStateAndReset(modifies, current);
+
             // parse the else body
-            List<Tree<String>> added = parseBody(node.getElseStmt().get().getChildNodes());
-            modifiesList(current, modifies, added);
-        }
-        // save the state of the vars of the else state
-        List<Integer> elseState = getVarsStateAndReset(modifies, current);
+            parseBody(node.getElseStmt().get().getChildNodes());
 
-        //End-if tree path condition
-        {
-            Tree<String> endIf = new Tree<>("=");
-            endIf.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
-            Tree<String> disjunction = new Tree<>("||");
-            endIf.addRightNode(disjunction);
-            disjunction.addLeftNode(new Tree<>(ifPath));
-            disjunction.addRightNode(new Tree<>(elsePath));
-            lines.add(endIf);
-        }
+            // save the state of the vars of the else state
+            List<Integer> elseState = getVarsStateAndReset(modifies, current);
 
-        if (node.getElseStmt().isPresent()) {
             for (int i = 0; i < ifState.size(); i++) {
                 Variable var = vars.get(modifies.get(i));
                 int ifVal = ifState.get(i);
@@ -362,16 +297,16 @@ public class Main {
                 lines.add(setValue);
             }
         }
-    }
 
-    private static void modifiesList(List<Integer> current, List<String> modifies, List<Tree<String>> added) {
-        for (Tree<String> tree : added) {
-            if (tree.getData().equals("=")) {
-                String varname = truncateUnderscore(tree.getLeft().getData());
-                if (modifies.add(varname)) {
-                    current.add(vars.get(varname).getPreviousInt());
-                }
-            }
+        //End-if tree path condition
+        {
+            Tree<String> endIf = new Tree<>("=");
+            endIf.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getNext()));
+            Tree<String> disjunction = new Tree<>("||");
+            endIf.addRightNode(disjunction);
+            disjunction.addLeftNode(new Tree<>(ifPath));
+            disjunction.addRightNode(new Tree<>(elsePath));
+            lines.add(endIf);
         }
     }
 
@@ -418,14 +353,11 @@ public class Main {
      * Parses the body of an if/else/while statement
      * @return
      */
-    private static List<Tree<String>> parseBody(List<Node> nodes) {
-        List<Tree<String>> added = new ArrayList<>();
+    private static void parseBody(List<Node> nodes) {
         for (Node node : nodes) {
             Tree<String> expTree = parseExpression(node);
             lines.add(expTree);
-            added.add(expTree);
         }
-        return added;
     }
 
     /**
@@ -511,7 +443,8 @@ public class Main {
                 return ctx.mkAnd((BoolExpr) parseSSATree(tree.getRight().getLeft(), ctx),
                         ctx.mkNot((BoolExpr) parseSSATree(tree.getRight().getRight(), ctx)));
             case "assertinv":
-                return ctx.mkNot((BoolExpr) parseSSATree(tree.getRight(), ctx));
+                return ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getLeft().getLeft(), ctx),
+                        (BoolExpr) parseSSATree(tree.getLeft().getRight(), ctx)));
             case "=>":
                 return ctx.mkImplies((BoolExpr) parseSSATree(tree.getLeft(), ctx),
                         (BoolExpr) parseSSATree(tree.getRight(), ctx));
@@ -578,14 +511,5 @@ public class Main {
     }
 
 
-    private static String truncateUnderscore(String input) {
-        String[] split = input.split("_");
-        StringBuilder res = new StringBuilder();
-        for (int i = 0; i < split.length-1; i++) {
-            res.append("_").append(split[i]);
-        }
-        res.deleteCharAt(0);
-        return res.toString();
-    }
 
 }
