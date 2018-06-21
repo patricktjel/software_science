@@ -39,17 +39,21 @@ public class Main {
             vars.put(parameter.getNameAsString(), new Variable(parameter.getNameAsString(), parameter.getTypeAsString()));
         }
 
-        //Set up initial Path variables
+
         vars.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
+
+        //Set-up requires in (as seen in reader page 16, before path conditions
+        if (method.getComment().isPresent()) {
+            Tree<String> requires = parseBinExpression(JavaParser.parseExpression(method.getComment().get().getContent()));
+            lines.add(requires);
+        }
+
+        //Set up initial Path variables
         Tree<String> tree = new Tree<>("=");
         tree.addLeftNode(new Tree<>(vars.get("c").getCurrent()));
-        if (!method.getComment().isPresent()) {
-            tree.addRightNode(new Tree<>("true"));
-        } else {
-            Tree<String> requires = parseBinExpression(JavaParser.parseExpression(method.getComment().get().getContent()));
-            tree.addRightNode(requires);
-        }
+        tree.addRightNode(new Tree<>("true"));
         lines.add(tree);
+
         BlockStmt code = (BlockStmt) method.getChildNodes().get(method.getChildNodes().size() - 1);
 
         parseMethodToSSA(code);
@@ -526,7 +530,11 @@ public class Main {
         if (tree.getLeft() == null && tree.getRight() == null) {
             if (z3Vars.containsKey(tree.getData())) {
                 return z3Vars.get(tree.getData());
-            } else {
+            } else if (tree.getData().equals("true")) {
+                return ctx.mkTrue();
+            } else if (tree.getData().equals("false")) {
+                return ctx.mkFalse();
+            }else {
                 return ctx.mkInt(tree.getData());
             }
         }
@@ -583,6 +591,10 @@ public class Main {
             case "*":
                 return ctx.mkMul((ArithExpr)parseSSATree(tree.getLeft(), ctx),
                         (ArithExpr)parseSSATree(tree.getRight(), ctx));
+            case "true":
+                return ctx.mkTrue();
+            case "false":
+                return ctx.mkFalse();
             default:
                 return null;
         }
