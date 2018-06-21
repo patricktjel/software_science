@@ -207,7 +207,7 @@ public class Main {
     private static void parseAssert(AssertStmt node) {
         lines.add(new Tree<>("push"));
         Tree<String> a = new Tree<>("assert");
-        Tree<String> and = new Tree<>("=>");
+        Tree<String> and = new Tree<>("&&");
         a.addRightNode(and);
         and.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
         and.addRightNode(new Tree<>("!"));
