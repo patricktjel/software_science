@@ -206,10 +206,11 @@ public class Main {
     private static void parseAssert(AssertStmt node) {
         lines.add(new Tree<>("push"));
         Tree<String> a = new Tree<>("assert");
-        Tree<String> and = new Tree<>("&&");
+        Tree<String> and = new Tree<>("=>");
         a.addRightNode(and);
         and.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
-        and.addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
+        and.addRightNode(new Tree<>("!"));
+        and.getRight().addRightNode(parseBinExpression((BinaryExpr) node.getCheck()));
         lines.add(a);
         lines.add(new Tree<>("check-sat"));
         lines.add(new Tree<>("pop"));
@@ -365,7 +366,7 @@ public class Main {
                 // determine which value is set during the ITE
                 Tree<String> setValue = new Tree<>("=");
                 Tree<String> pathCon = new Tree<>("?");
-                pathCon.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getPrevious()));
+                pathCon.addLeftNode(new Tree<>(ifPath));
                 setValue.addRightNode(pathCon);
 
                 Tree<String> ifElseTree = new Tree<>(":");
@@ -524,8 +525,6 @@ public class Main {
         // else parse it's leaves
         switch (tree.getData().toLowerCase()) {
             case "assert":
-                return ctx.mkAnd((BoolExpr) parseSSATree(tree.getRight().getLeft(), ctx),
-                        ctx.mkNot((BoolExpr) parseSSATree(tree.getRight().getRight(), ctx)));
             case "assertinv":
                 return ctx.mkNot((BoolExpr) parseSSATree(tree.getRight(), ctx));
             case "=>":
