@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.microsoft.z3.*;
 
@@ -72,8 +73,9 @@ public class Main {
      */
     private static void parseWhile(WhileStmt node) {
         String[] comment = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent().split(";");
-        String modifies = comment[1].trim();
-        Expression parsed_inv = JavaParser.parseExpression(comment[0]);
+        Expression decreases = JavaParser.parseExpression(comment[0]);
+        Expression parsed_inv = JavaParser.parseExpression(comment[1]);
+        String modifies = comment[2].trim();
 
         // invariant should hold
         {
@@ -97,9 +99,21 @@ public class Main {
             condition_path.addRightNode(and);
             lines.add(condition_path);
         }
+
+        // save the decreases value
+        Tree<String> decreases_left;
         // the body
         {
             vars.get(modifies).getNext();
+
+            // save the decreases value at the beginning of the loop body
+            if (decreases instanceof BinaryExpr) {
+                decreases_left = parseBinExpression((BinaryExpr) decreases);
+            } else {
+                String val = ((NameExpr) decreases).getName().toString();
+                decreases_left = new Tree<>(vars.get(val).getCurrent());
+            }
+
             Tree<String> invariant = parseBinExpression((BinaryExpr) parsed_inv);
             Tree<String> condition = parseBinExpression((BinaryExpr) node.getCondition());
 
@@ -132,6 +146,26 @@ public class Main {
             assertinv.addRightNode(invariant);
 
             tree.addRightNode(assertinv);
+
+            lines.add(new Tree<>("push"));
+            lines.add(tree);
+            lines.add(new Tree<>("check-sat"));
+            lines.add(new Tree<>("pop"));
+        }
+        // decreases
+        {
+            Tree<String> decreases_right;
+            if (decreases instanceof BinaryExpr) {
+                decreases_right = parseBinExpression((BinaryExpr) decreases);
+            } else {
+                String val = ((NameExpr) decreases).getName().toString();
+                decreases_right = new Tree<>(vars.get(val).getCurrent());
+            }
+
+            Tree<String> tree = new Tree<>("assertinv");
+            tree.addRightNode(new Tree<>(">"));
+            tree.getRight().addLeftNode(decreases_left);
+            tree.getRight().addRightNode(decreases_right);
 
             lines.add(new Tree<>("push"));
             lines.add(tree);
@@ -460,8 +494,7 @@ public class Main {
                 return ctx.mkAnd((BoolExpr) parseSSATree(tree.getRight().getLeft(), ctx),
                         ctx.mkNot((BoolExpr) parseSSATree(tree.getRight().getRight(), ctx)));
             case "assertinv":
-                return ctx.mkNot(ctx.mkAnd((BoolExpr) parseSSATree(tree.getRight().getLeft(), ctx),
-                        (BoolExpr) parseSSATree(tree.getRight().getRight(), ctx)));
+                return ctx.mkNot((BoolExpr) parseSSATree(tree.getRight(), ctx));
             case "=>":
                 return ctx.mkImplies((BoolExpr) parseSSATree(tree.getLeft(), ctx),
                         (BoolExpr) parseSSATree(tree.getRight(), ctx));
