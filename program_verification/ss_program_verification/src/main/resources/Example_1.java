@@ -14,3 +14,5 @@ public class Example {
         assert n4 % 2 == 0;
     }
 }
+
+// expected result:  unsat

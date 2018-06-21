@@ -13,3 +13,5 @@ public class Example {
         assert n5 % 2 == 0;
     }
 }
+
+// expected result: sat

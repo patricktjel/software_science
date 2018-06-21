@@ -244,7 +244,7 @@ public class Main {
         } else {
             Variable var = vars.get(decl.getInitializer().get().toString());
             if (var != null) {
-                thenElse.addLeftNode(new Tree<>(vars.get(decl.getInitializer().get().toString()).getCurrent()));
+                thenElse.addLeftNode(new Tree<>(var.getCurrent()));
             } else {
                 thenElse.addLeftNode(new Tree<>(decl.getInitializer().get().toString()));
             }
@@ -278,7 +278,6 @@ public class Main {
         // If condition
         String oldPath = vars.get(PATH_LETTER).getCurrent();
         String ifPath = vars.get(PATH_LETTER).getNext();
-        String elsePath = vars.get(PATH_LETTER).getNext();
 
         List<Integer> current = new ArrayList<>();
         List<String> modifies = new ArrayList<>();
@@ -302,6 +301,7 @@ public class Main {
             modifiesList(current, modifies, added);
         }
 
+        String elsePath = vars.get(PATH_LETTER).getNext();
         //Else condition path value
         {
             Tree<String> elseTree = new Tree<>("=");

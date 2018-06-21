@@ -10,3 +10,5 @@ public class Example {
         assert i == 5;
     }
 }
+
+// expected result: unsat unsat unsat sat
