@@ -39,7 +39,6 @@ public class Main {
             vars.put(parameter.getNameAsString(), new Variable(parameter.getNameAsString(), parameter.getTypeAsString()));
         }
 
-
         vars.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
 
         //Set-up requires in (as seen in reader page 16, before path conditions
@@ -591,10 +590,6 @@ public class Main {
             case "*":
                 return ctx.mkMul((ArithExpr)parseSSATree(tree.getLeft(), ctx),
                         (ArithExpr)parseSSATree(tree.getRight(), ctx));
-            case "true":
-                return ctx.mkTrue();
-            case "false":
-                return ctx.mkFalse();
             default:
                 return null;
         }
