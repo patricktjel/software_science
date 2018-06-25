@@ -41,7 +41,7 @@ public class Main {
 
         vars.put(PATH_LETTER, new Variable(PATH_LETTER, "Bool"));
 
-        //Set-up requires in (as seen in reader page 16, before path conditions
+        //Set-up requires in (as seen in reader page 16, before path conditions)
         if (method.getComment().isPresent()) {
             Tree<String> requires = parseBinExpression(JavaParser.parseExpression(method.getComment().get().getContent()));
             lines.add(requires);
@@ -359,6 +359,7 @@ public class Main {
             lines.add(endIf);
         }
 
+        // if there was an else body merge the two branches
         if (node.getElseStmt().isPresent()) {
             for (int i = 0; i < elseState.size(); i++) {
                 Variable var = vars.get(modifies.get(i));
@@ -395,6 +396,12 @@ public class Main {
         }
     }
 
+    /**
+     * Keeps track which variables gets modified during an if branch
+     * @param current   The list with all current values of an variable
+     * @param modifies  The list with all modified variables
+     * @param added     A list with all the trees of an if branch.
+     */
     private static void modifiesList(List<Integer> current, List<String> modifies, List<Tree<String>> added) {
         for (Tree<String> tree : added) {
             if (tree.getData().equals("=")) {
@@ -407,7 +414,14 @@ public class Main {
         }
     }
 
-    public static List<Integer> getVarsStateAndReset(List<String> modifies, List<Integer> current) {
+    /**
+     * Returns the state of all vars after the if branch to remember them
+     * and resets all variables to the state at the beginning of the ITE code
+     * @param modifies  The list with all variables which are modified during the ITE code
+     * @param current   A list with the states of variables at the beginning of the ITE code
+     * @return          A list with all variable states at the end of an if branch.
+     */
+    private static List<Integer> getVarsStateAndReset(List<String> modifies, List<Integer> current) {
         List<Integer> collect = modifies.stream().map(s -> vars.get(s).getVariables().size() - 1).collect(Collectors.toList());
         for (int i = 0; i < modifies.size(); i++) {
             vars.get(modifies.get(i)).resetTo(current.get(i));
@@ -448,7 +462,7 @@ public class Main {
 
     /**
      * Parses the body of an if/else/while statement
-     * @return
+     * @return  A list with all the parsed lines.
      */
     private static List<Tree<String>> parseBody(List<Node> nodes) {
         List<Tree<String>> added = new ArrayList<>();
@@ -609,7 +623,12 @@ public class Main {
         System.out.println("------- END SSA ---------");
     }
 
-
+    /**
+     * Truncates the string after the last underscore
+     * e.g. `c_0` returns `c`
+     * @param input String
+     * @return      Truncated String
+     */
     private static String truncateUnderscore(String input) {
         String[] split = input.split("_");
         StringBuilder res = new StringBuilder();
