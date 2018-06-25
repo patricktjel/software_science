@@ -32,6 +32,10 @@ public class Variable {
         return variables.get(variables.size() - 1);
     }
 
+    public int getCurrentInt() {
+        return variables.size() - 1;
+    }
+
     /**
      * Tries to return the previous value.
      * If there is no previous value than it will return the current value

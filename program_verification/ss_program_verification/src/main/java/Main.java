@@ -298,7 +298,7 @@ public class Main {
         String oldPath = vars.get(PATH_LETTER).getCurrent();
         String ifPath = vars.get(PATH_LETTER).getNext();
 
-        List<Integer> current = new ArrayList<>();
+        List<Integer> valuesBeforeIf = new ArrayList<>();
         List<String> modifies = new ArrayList<>();
 
         BinaryExpr con = (BinaryExpr) node.getCondition();
@@ -314,10 +314,16 @@ public class Main {
             lines.add(tree);
         }
 
+        Map<String, Integer> varsBeforeIf = new HashMap<>();
+
+        for (Variable var : vars.values()) {
+            varsBeforeIf.put(var.getName(), var.getCurrentInt());
+        }
+
         //If body
         {
             List<Tree<String>> added = parseBody(node.getThenStmt().getChildNodes());
-            modifiesList(current, modifies, added);
+            modifiesList(valuesBeforeIf, varsBeforeIf, modifies, added);
         }
 
         String elsePath = vars.get(PATH_LETTER).getNext();
@@ -342,14 +348,14 @@ public class Main {
         //Only printInOrder an if body if the if body is present
         if (node.getElseStmt().isPresent()) {
             // save the state of the vars of the if state before resetting everything.
-            ifState = getVarsStateAndReset(modifies, current);
+            ifState = getVarsStateAndReset(modifies, valuesBeforeIf);
 
             // parse the else body
             List<Tree<String>> added = parseBody(node.getElseStmt().get().getChildNodes());
-            modifiesList(current, modifies, added);
+            modifiesList(valuesBeforeIf, varsBeforeIf, modifies, added);
 
             // save the state of the vars of the else state
-            elseState = getVarsStateAndReset(modifies, current);
+            elseState = getVarsStateAndReset(modifies, valuesBeforeIf);
         }
 
         //End-if tree path condition
@@ -370,7 +376,7 @@ public class Main {
 
                 int ifVal;
                 if (i >= ifState.size()) {
-                    ifVal = current.get(i);
+                    ifVal = valuesBeforeIf.get(i);
                 } else {
                     ifVal = ifState.get(i);
                 }
@@ -402,17 +408,22 @@ public class Main {
 
     /**
      * Keeps track which variables gets modified during an if branch
-     * @param current   The list with all current values of an variable
-     * @param modifies  The list with all modified variables
-     * @param added     A list with all the trees of an if branch.
+     * @param valuesBeforeIf    The list with all valuesBeforeIf values of an variable
+     * @param varsBeforeIf      A map with key value pairs of all var values before the ITE code
+     * @param modifies          The list with all modified variables
+     * @param added             A list with all the trees of an if branch.
      */
-    private static void modifiesList(List<Integer> current, List<String> modifies, List<Tree<String>> added) {
+    private static void modifiesList(List<Integer> valuesBeforeIf, Map<String, Integer> varsBeforeIf, List<String> modifies, List<Tree<String>> added) {
         for (Tree<String> tree : added) {
             if (tree.getData().equals("=")) {
                 String varname = truncateUnderscore(tree.getLeft().getData());
                 if (!modifies.contains(varname)) {
                     modifies.add(varname);
-                    current.add(vars.get(varname).getPreviousInt());
+                    if (varsBeforeIf.containsKey(varname)) {
+                        valuesBeforeIf.add(varsBeforeIf.get(varname));
+                    } else {
+                        valuesBeforeIf.add(vars.get(varname).getPreviousInt());
+                    }
                 }
             }
         }
