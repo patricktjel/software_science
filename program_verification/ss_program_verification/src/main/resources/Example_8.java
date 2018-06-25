@@ -1,17 +1,17 @@
+//These are the loops based on the examples given in class (i-- has been replaced by i = i - 1, -i is replaced by 0 - 1 to ease our parsing)
 public class Example {
 
-    public void mul_to_even(int n4, int n3) {
-        int n5 = n4 * 3;
-        if (n3 % 2 == 0) {
-            int n4 = n3 * 3;
-            int n5 = n4 * 2;
-            int n5 = n5 * 2;
-            int n5 = n4;
-        } else {
-            int n5 = 4;
-            int n4 = n3 * 2;
+    // y > 0
+    public void count_to_five(int y) {
+        int x = 0;
+        int i = y;
+        while (i > 0) {
+//           i; i*2 + x == y*2 && i >= 0; i, x
+            int i = i - 1;
+            int x = x + 2;
         }
+        assert x == 2 * y;
     }
 }
 
-// expected result: just runnable
+// expected result:  unsat unsat unsat unsat
