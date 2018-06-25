@@ -88,7 +88,7 @@ public class Main {
         String[] comment = node.getChildNodes().get(1).getChildNodes().get(0).getComment().get().getContent().split(";");
         Expression decreases = JavaParser.parseExpression(comment[0]);
         Expression parsed_inv = JavaParser.parseExpression(comment[1]);
-        String modifies = comment[2].trim();
+        List<String> modifies = Arrays.stream(comment[2].split(",")).map(String::trim).collect(Collectors.toList());
 
         // invariant should hold
         {
@@ -117,7 +117,9 @@ public class Main {
         Tree<String> decreases_left;
         // the body
         {
-            vars.get(modifies).getNext();
+            for (String s : modifies) {
+                vars.get(s).getNext();
+            }
 
             // save the decreases value at the beginning of the loop body
             if (decreases instanceof BinaryExpr) {
@@ -193,7 +195,9 @@ public class Main {
         }
         //After the loop is complete the invariant still holds, and the loop condition does not hold anymore
         {
-            vars.get(modifies).getNext();
+            for (String s : modifies) {
+                vars.get(s).getNext();
+            }
 
             Tree<String> tree = new Tree<>("=>");
             tree.addLeftNode(new Tree<>(vars.get(PATH_LETTER).getCurrent()));
