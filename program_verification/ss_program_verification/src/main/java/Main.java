@@ -282,8 +282,8 @@ public class Main {
     /**
      * Creates trees for ITE statements (one tree for the if, one for every line in the body, one for the else,
      *          one for every line in the else body, one for every modified variable and one for the close of the if)
-     * This method will save the state of the variables which will be modified at the beginning of the if statement.
-     * After the if body is executed it will save the state of these variables again in the variable ifState and the vars get a reset till the beginning state of the if statement.
+     * This method keeps track of all modified variables during the if branches.
+     * After the if body is executed it will save the state of these variables in the variable ifState and the vars get a reset till the beginning state of the if statement.
      * After the else body is executed the same will happen, the variables will be saved in the variable elseState and the vars get a reset.
      *
      * To be able to use the variables again outside the if statement another line gets added.
