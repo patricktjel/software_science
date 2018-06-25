@@ -6,7 +6,7 @@ public class Example {
         int x = 0;
         int i = y;
         while (i > 0) {
-//          i; i*2 + x == y*2 && i >= 0; i
+//          i; i*2 + x == y*2 && i >= 0; i, x
             int i = i - 1;
             int x = x + 2;
         }
